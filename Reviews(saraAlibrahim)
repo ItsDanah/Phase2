@@ -1,0 +1,144 @@
+package Phase2;
+
+public class Reviews {
+
+	// Static list holding all reviews made in the system
+	private static LinkedList<Reviews> reviews = new LinkedList<>();
+
+	// Attributes
+	private int reviewId;      // review ID for each review
+	private int productId;     // ID of the reviewed product
+	private int customerId;    // ID of the customer who wrote the review
+	private int ratingScore;   //  rating from 1 to 5
+	private String textComment; // comment on the review
+
+	// Constructor:
+	public Reviews(int reviewId, int productId, int customerId, int ratingScore, String textComment) {
+		this.reviewId = reviewId;
+		this.productId = productId;
+		this.customerId = customerId;
+		this.ratingScore = ratingScore;
+		this.textComment = textComment;
+	}
+
+	//----------------------------------------------------------------------------------//
+	// Add a new review to both the static list and the review list in class Products
+
+	public static boolean addReview(Reviews review) {
+
+		// Add review to the static review list
+		reviews.insert(review);
+
+		// Add the review to the product's own review list
+		Products product = Products.searchById(review.getProductId());
+		if (product != null) {
+			product.addReview(review); 
+			return true;
+		}
+		return false;
+	}
+
+	//----------------------------------------------------------------------------------//
+	// Edit a review
+
+	public static boolean editReview(int reviewId, int ratingScore, String textComment) {
+
+		boolean edited = false;
+
+		if (reviews.empty()) {
+			System.out.println("No reviews found");
+			return edited;
+		}
+
+		reviews.findFirst();
+		while (true) {
+			// edit in the static list
+			Reviews r = reviews.retrieve();
+			if (r.getReviewId() == reviewId) {
+				r.setRatingScore(ratingScore);
+				r.setTextComment(textComment);
+				edited = true;
+
+				// edit inside the product's list of reviews
+				Products product = Products.searchById(r.getProductId());
+				if (product != null) {
+					LinkedList<Reviews> productReviews = product.getReviewsList();
+					productReviews.findFirst();
+					while (true) {
+						Reviews pr = productReviews.retrieve();
+						if (pr.getReviewId() == reviewId) { // Find the same review inside the product’s list
+							pr.setRatingScore(ratingScore);
+							pr.setTextComment(textComment);
+						}
+						if (productReviews.last()) // if we are at the last review, stop looping
+							break;
+						productReviews.findNext();
+					}
+				}
+				break;
+			}
+
+			// Stop when we reach the end of the reviews list
+			if (reviews.last())
+				break;
+			reviews.findNext();
+		}
+
+		return edited;
+	}
+
+	//----------------------------------------------------------------------------------//
+	// Calculate and return the average rating of all reviews in the system
+
+	public static int averageRating() {
+
+		int sum = 0;
+		if (reviews.empty())
+			return sum; // no reviews = 0
+
+		// loop through the review list and add all rating scores
+		reviews.findFirst();
+		while (true) {
+			sum += reviews.retrieve().getRatingScore(); 
+			if (reviews.last()) 
+				break; // stop at last element
+			reviews.findNext();
+		}
+
+		// Average = sum of reviews / number of reviews
+		return sum / reviews.getSize();
+	}
+
+	//----------------------------------------------------------------------------------//
+	
+	public String toString() {
+		return "Review ID: " + reviewId +" || Product ID: " + productId +" || Customer ID: " + customerId +" || Rating: " + ratingScore +" || Comment: " + textComment;
+	}
+	
+	//----------------------------------------------------------------------------------//
+	// Setters and getters
+	
+	public int getReviewId() { 
+		return reviewId; }
+	
+	public int getProductId() { 
+		return productId; }
+	
+	public int getCustomerId() { 
+		return customerId; }
+	
+	public int getRatingScore() { 
+		return ratingScore; }
+	
+	public String getTextComment() { 
+		return textComment; }
+	
+	public void setRatingScore(int ratingScore) { 
+		this.ratingScore = ratingScore; }
+	
+	public void setTextComment(String textComment) { 
+		this.textComment = textComment; }
+
+	public static LinkedList<Reviews> getReviews() { 
+		return reviews; }
+}
