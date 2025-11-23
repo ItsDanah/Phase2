@@ -1,5 +1,16 @@
-package Phase2;
+package project212;
 
+// Enum for balance factor
 public enum Balance {
-    PlusOne, Zero, MinusOne 
+    PlusOne(1), Zero(0), MinusOne(-1);
+
+    private final int value;
+
+    Balance(int value) {
+        this.value = value;
+    }
+
+    public int getValue() {
+        return value;
+    }
 }
