@@ -1,4 +1,4 @@
-package project212;
+package Phase2;
 
 // Enum for balance factor
 public enum Balance {
