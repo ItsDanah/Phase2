@@ -1,132 +1,210 @@
-package Phase2;
+package project212;
 
-public class AVL <T> {
+// AVL Tree class
+public class AVLTree<T> {
+	private AVLNode<T> root; // Root node of the AVL Tree
 
-	AVLNode<T> root, current;
-
-	/** Creates a new instance of AVL */
-	public AVL() {
-		root = current = null;
+	public AVLTree() {
+		root = null; // Initialize tree as empty
 	}
-	public boolean empty() {
-		return root == null;
+	//---------------------------------------------------------------------------------------------------------------------------------
+
+	// --------------------------
+	// PUBLIC METHODS
+	// --------------------------
+
+	//---------------------------------------------------------------------------------------------------------------------------------
+
+	public void insert(int key, T data) {
+		root = insertRec(root, key, data); // Call recursive helper, root is the starting "current node"
 	}
-	public boolean full() {
-		return false;
+	//---------------------------------------------------------------------------------------------------------------------------------
+
+	public void remove(int key) {
+		root = removeRec(root, key); // Call recursive helper, root is the starting "current node"
 	}
-	public T retrieve () {
-		return current.data;
-	}
+	//---------------------------------------------------------------------------------------------------------------------------------
 
-	public boolean findkey(int tkey) {
-		AVLNode<T> p = root,q = root;
-
-		if(empty())
-			return false;
-		while(p != null) {
-			q = p;
-			if(p.key == tkey) {
-				current = p;
-				return true;
-			}
-			else if(tkey < p.key)
-				p = p.left;
-			else
-				p = p.right;
-		}
-		current = q;
-		return false;
-	}
-	
-	
-
-	public boolean insert(int k, T val) {
-		AVLNode<T> p, q = current;
-
-		if(findkey(k)) {
-			current = q;  // findkey() modified current
-			return false; // key already in the BST
-		}
-
-		p = new AVLNode<T>(k, val);
-		if (empty()) {
-			root = current = p;
-			return true;
-		}
-		else {
-			// current is pointing to parent of the new key
-			if (k < current.key)
-				current.left = p;
-			else
-				current.right = p;
-			current = p;
-			return true;
-		}
-	}
-	
-	
-
-	private void deleteNode(AVLNode<T> n,AVLNode<T> parent){
-		// parent is the parent of n. The method deletes node n (case 1 and 2)
-		AVLNode<T> child;
-		if(n.left!=null)
-			child=n.left;
-		else
-			child=n.right;
-		if (parent == null) { // No parent for p, root must change
-			root = child;  
+	public T find(int key) {
+		AVLNode<T> node = findRec(root, key); // Find node recursively, root is the starting "current node"
+		if (node != null) {
+			return node.data; // Return data if found
 		} else {
-			if (n.key- parent.key < 0) {
-				parent.left = child;
+			return null; // Return null if not found
+		}
+	}
+	//---------------------------------------------------------------------------------------------------------------------------------
+
+	public void update(int key, T data) {
+		AVLNode<T> node = findRec(root, key); // Find node recursively, root is the starting "current node"
+		if (node != null) {
+			node.data = data; // Update data
+		}
+	}
+	//---------------------------------------------------------------------------------------------------------------------------------
+
+	public void traverseInOrder() {
+		traverseInOrderRec(root); // Call recursive helper, root is the starting "current node"
+	}
+	//---------------------------------------------------------------------------------------------------------------------------------
+
+	// --------------------------
+	// PRIVATE HELPER METHODS
+	// --------------------------
+
+	//---------------------------------------------------------------------------------------------------------------------------------
+	private AVLNode<T> insertRec(AVLNode<T> node, int key, T data) {
+		// 'node' is the current node in this recursion
+		if (node == null) {
+			return new AVLNode<>(key, data); // Empty spot found: insert new node
+		}
+		if (key < node.key) {
+			node.left = insertRec(node.left, key, data); // Recurse left subtree, left child becomes the new current node
+		} else if (key > node.key) {
+			node.right = insertRec(node.right, key, data); // Recurse right subtree, right child becomes the new current node
+		} else {
+			node.data = data; // Key already exists: update data only
+		}
+		return balance(node); // Balance the tree after insertion, node is still the current node
+	}
+	//---------------------------------------------------------------------------------------------------------------------------------
+
+	private AVLNode<T> removeRec(AVLNode<T> node, int key) {
+		// 'node' is the current node in this recursion
+		if (node == null) {
+			return null; // Key not found
+		}
+		if (key < node.key) {
+			node.left = removeRec(node.left, key); // Traverse left, left child is new current node
+		} else if (key > node.key) {
+			node.right = removeRec(node.right, key); // Traverse right, right child is new current node
+		} else {
+			if (node.left == null) {
+				return node.right; // Replace current node with right child
+			} else if (node.right == null) {
+				return node.left; // Replace current node with left child
+			}
+			AVLNode<T> minNode = findMin(node.right); // Minimum node in right subtree
+			node.key = minNode.key; // Copy key
+			node.data = minNode.data; // Copy data
+			node.right = removeRec(node.right, minNode.key); // Remove successor, right child is new current node
+		}
+		return balance(node); // Balance the tree after deletion
+	}
+	//---------------------------------------------------------------------------------------------------------------------------------
+
+	private AVLNode<T> findRec(AVLNode<T> node, int key) {
+		// 'node' is the current node in this recursion
+		if (node == null) {
+			return null; // Key not found
+		}
+		if (key == node.key) {
+			return node; // Key found, current node returned
+		}
+		if (key < node.key) {
+			return findRec(node.left, key); // Search left subtree, left child becomes current node
+		} else {
+			return findRec(node.right, key); // Search right subtree, right child becomes current node
+		}
+	}
+	//---------------------------------------------------------------------------------------------------------------------------------
+
+	private void traverseInOrderRec(AVLNode<T> node) {
+		// 'node' is the current node in this recursion
+		if (node != null) {
+			traverseInOrderRec(node.left); // Visit left subtree, left child becomes current node
+			System.out.println("Key: " + node.key + ", Data: " + node.data); // Visit current node
+			traverseInOrderRec(node.right); // Visit right subtree, right child becomes current node
+		}
+	}
+	//---------------------------------------------------------------------------------------------------------------------------------
+
+	private AVLNode<T> findMin(AVLNode<T> node) {
+		// 'node' is the current node in this iteration
+		while (node.left != null) {
+			node = node.left; // Keep moving left, node updated as current node
+		}
+		return node; // Leftmost node found
+	}
+
+	//---------------------------------------------------------------------------------------------------------------------------------
+	// AVL BALANCING METHODS
+	//---------------------------------------------------------------------------------------------------------------------------------
+
+	private AVLNode<T> balance(AVLNode<T> node) {
+		// 'node' is the current node to check for balance
+		updateBalance(node); // Update balance factor
+		if (node.bal.getValue() > 1) { // Left-heavy
+			if (height(node.left.left) >= height(node.left.right)) {
+				node = rotateLL(node); // Left-Left rotation
 			} else {
-				parent.right=child;
+				node = rotateLR(node); // Left-Right rotation
+			}
+		} else if (node.bal.getValue() < -1) { // Right-heavy
+			if (height(node.right.right) >= height(node.right.left)) {
+				node = rotateRR(node); // Right-Right rotation
+			} else {
+				node = rotateRL(node); // Right-Left rotation
 			}
 		}
+		return node; // Return balanced node
 	}
+	//---------------------------------------------------------------------------------------------------------------------------------
 
-
-
-
-
-
-
-	public boolean removeKey(int k) {
-		// Search for k
-		AVLNode<T> p = root;
-		AVLNode<T> q = null; // Parent of p
-		boolean found=false;
-		while ((p != null)&&(!found)) {
-			int res = k - p.key;
-			if (res < 0) {
-				q = p;
-				p = p.left;
-			} else if (res > 0) {
-				q = p;
-				p = p.right;
-			} else // Found the key
-				found=true;
-		}
-		if(found){           
-			// Check the three cases
-			if ((p.left != null) && (p.right != null)) { // Case 3: two children
-				// Search for the min in the right subtree
-				AVLNode<T> min = p.right;
-				q = p;
-				while (min.left != null) {
-					q = min;
-					min = min.left;
-				}
-				p.key = min.key;
-				p.data = min.data;
-				deleteNode(min,q);
-			}
-			else //case 1 and 2
-				deleteNode(p,q);
-			current = root;
-			return true;
-		}
-		return false;
+	private void updateBalance(AVLNode<T> node) {
+		// 'node' is the current node being updated
+		int leftHeight = height(node.left);
+		int rightHeight = height(node.right);
+		if (leftHeight - rightHeight == 1)
+			node.bal = Balance.PlusOne;
+		else if (leftHeight - rightHeight == 0)
+			node.bal = Balance.Zero;
+		else
+			node.bal = Balance.MinusOne;
 	}
+	//---------------------------------------------------------------------------------------------------------------------------------
 
+	private int height(AVLNode<T> node) {
+		// 'node' is the current node for which height is calculated
+		if (node == null) {
+			return -1; // Leaf convention: leaf's children are null, height = -1
+		}
+		return 1 + Math.max(height(node.left), height(node.right)); // Height = 1 + max(left,right)
+	}
+	//---------------------------------------------------------------------------------------------------------------------------------
 
+	private AVLNode<T> rotateLL(AVLNode<T> node) {
+		// 'node' is the pivot/current node for rotation
+		AVLNode<T> newRoot = node.left; // New root is left child
+		node.left = newRoot.right; // Move right subtree of new root
+		newRoot.right = node; // Old root becomes right child
+		updateBalance(node); // Update balance of old root
+		updateBalance(newRoot); // Update balance of new root
+		return newRoot; // Return new root
+	}
+	//---------------------------------------------------------------------------------------------------------------------------------
+
+	private AVLNode<T> rotateRR(AVLNode<T> node) {
+		// 'node' is the pivot/current node for rotation
+		AVLNode<T> newRoot = node.right; // New root is right child
+		node.right = newRoot.left; // Move left subtree of new root
+		newRoot.left = node; // Old root becomes left child
+		updateBalance(node); // Update balance of old root
+		updateBalance(newRoot); // Update balance of new root
+		return newRoot; // Return new root
+	}
+	//---------------------------------------------------------------------------------------------------------------------------------
+
+	private AVLNode<T> rotateLR(AVLNode<T> node) {
+		// 'node' is the pivot/current node for rotation
+		node.left = rotateRR(node.left); // Rotate left child right
+		return rotateLL(node); // Then rotate node left
+	}
+	//---------------------------------------------------------------------------------------------------------------------------------
+
+	private AVLNode<T> rotateRL(AVLNode<T> node) {
+		// 'node' is the pivot/current node for rotation
+		node.right = rotateLL(node.right); // Rotate right child left
+		return rotateRR(node); // Then rotate node right
+	}
 }
