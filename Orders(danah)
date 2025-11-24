@@ -2,11 +2,11 @@ package Phase2;
 
 public class Orders {
 
-	// Static list holding all orders made in the system
-	private static LinkedList<Orders> orders = new LinkedList<>();
+	// Static AVL tree holding all orders made in the system
+	private static AVL<Orders> orders = new AVL<>();
 
-	// Each order contains its own list of products
-	private LinkedList<Products> productsList;
+	// Each order contains its own AVL of products
+	private AVL<Products> productsList;
 
 	// attributes
 	private int orderId;		 // ID of the order
@@ -23,11 +23,12 @@ public class Orders {
 		this.totalPrice = totalPrice;       
 		this.orderDate = orderDate;        
 		this.status = status;              
-		this.productsList = new LinkedList<>();
+		this.productsList = new AVL<>();
 	}
 
 	//----------------------------------------------------------------------------------//
 	// Create a new order in the system 
+	
 	public void createOrder(Orders order) {
 
 		// Check if an order with the same ID exists in the system
@@ -37,7 +38,7 @@ public class Orders {
 		}
 
 		// Add the new order to the static orders list
-		orders.insert(order);
+		orders.insert(order.getOrderId(),order);
 
 		// Add the order to the customer's own order list
 		if (order.getCustomer() != null) {
@@ -92,18 +93,11 @@ public class Orders {
 	// Search for an order by id
 
 	public static Orders searchById(int orderId) {
+		
 		if (orders.empty()) // if no orders exist
 			return null; 
 
-		orders.findFirst();
-		while (!orders.last()) {   // Go through the list until we find the matching order ID
-			if (orders.retrieve().getOrderId() == orderId)
-				return orders.retrieve(); 
-			orders.findNext();   
-		}
-
-		// Check for the last order in the list
-		if (orders.retrieve().getOrderId() == orderId)
+		if (orders.findkey(orderId))
 			return orders.retrieve();
 
 		return null;
@@ -112,47 +106,40 @@ public class Orders {
 	//----------------------------------------------------------------------------------//
 	// Get all orders made between two dates in the format YYYY-MM-DD
 
-	public static LinkedList<Orders> getOrdersBetweenDates(String date1, String date2) {
-		LinkedList<Orders> ordersBetweenDates = new LinkedList<>(); // A new list to hold matching orders
+    public static AVL<Orders> getOrdersBetweenDates(String date1, String date2) {
+        AVL<Orders> result = new AVL<>();
 
-		if (orders.empty()) 
-			return ordersBetweenDates;
+        if (orders.empty()) return result;
 
-		// Edit both date strings into integers for comparison
-		int d1 = Integer.parseInt(date1.replace("-", ""));
-		int d2 = Integer.parseInt(date2.replace("-", ""));
+        int d1 = Integer.parseInt(date1.replace("-", ""));
+        int d2 = Integer.parseInt(date2.replace("-", ""));
 
-		orders.findFirst();
-		while (true) {
-			String date = orders.retrieve().getOrderDate();
-			int d = Integer.parseInt(date.replace("-", "")); 
-			if (d >= d1 && d <= d2)  // If order date is between date1 and date2 add it to the list
-				ordersBetweenDates.insert(orders.retrieve());
-			if (orders.last()) 
-				break; 
-			orders.findNext();
-		}
-		return ordersBetweenDates;
-	}
+        traverseDateRange(orders.root, d1, d2, result);
+
+        return result;
+    }
+
+    private static void traverseDateRange(AVLNode<Orders> node, int d1, int d2, AVL<Orders> orders) {
+        if (node == null) 
+        	return;
+
+        traverseDateRange(node.left, d1, d2, orders);
+
+        int orderDateInt = Integer.parseInt(node.data.getOrderDate().replace("-", ""));
+        if (orderDateInt >= d1 && orderDateInt <= d2) {
+            orders.insert(node.data.getOrderId(), node.data);
+        }
+
+        traverseDateRange(node.right, d1, d2, orders);
+    }
 
 	//----------------------------------------------------------------------------------//
 
-	public String toString() {
-		String productIds = "No products";
+    public String toString() {
 
-		if (!productsList.empty()) { // Collect all product IDs if the list is not empty
-			productIds = "";
-			productsList.findFirst();
+        return "Order ID: " + orderId +" || Customer ID: " + customerId + " || Total Price: " + totalPrice + " || Order Date: " + orderDate + " || Status: " + status;
+    }
 
-			while (!productsList.last()) {
-				productIds += productsList.retrieve().getProductId() + ";";
-				productsList.findNext();
-			}
-			productIds += productsList.retrieve().getProductId(); // Add the last product
-		}
-
-		return "Order ID: " + orderId +" || Customer ID: " + customerId +" || Products: " + productIds +" || Total Price: " + totalPrice +" || Order Date: " + orderDate +" || Status: " + status;
-	}
 
 	//----------------------------------------------------------------------------------//
 	// Getters and setters
@@ -186,13 +173,13 @@ public class Orders {
 	public void setStatus(String status) { 
 		this.status = status; }
 
-	public LinkedList<Products> getProductsList() { 
+	public AVL<Products> getProductsList() { 
 		return productsList; }
 
-	public void setProductsList(LinkedList<Products> productsList) { 
+	public void setProductsList(AVL<Products> productsList) { 
 		this.productsList = productsList; }
 
-	public static LinkedList<Orders> getOrders() { 
+	public static AVL<Orders> getOrders() { 
 		return orders; }
 
 }
