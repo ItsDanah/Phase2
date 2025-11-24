@@ -3,8 +3,7 @@ package Phase2;
 public class Reviews {
 
 	// Static list holding all reviews made in the system
-	private static LinkedList<Reviews> reviews = new LinkedList<>();
-
+	private static AVL<Reviews> reviews = new AVL<>();
 	// Attributes
 	private int reviewId;      // review ID for each review
 	private int productId;     // ID of the reviewed product
@@ -22,92 +21,98 @@ public class Reviews {
 	}
 
 	//----------------------------------------------------------------------------------//
-	// Add a new review to both the static list and the review list in class Products
+	// Add a new review to AVL tree  O(log n) 
 
 	public static boolean addReview(Reviews review) {
 
-		// Add review to the static review list
-		reviews.insert(review);
-
-		// Add the review to the product's own review list
-		Products product = Products.searchById(review.getProductId());
-		if (product != null) {
-			product.addReview(review); 
-			return true;
-		}
-		return false;
-	}
-
-	//----------------------------------------------------------------------------------//
-	// Edit a review
-
-	public static boolean editReview(int reviewId, int ratingScore, String textComment) {
-
-		boolean edited = false;
-
-		if (reviews.empty()) {
-			System.out.println("No reviews found");
-			return edited;
-		}
-
-		reviews.findFirst();
-		while (true) {
-			// edit in the static list
-			Reviews r = reviews.retrieve();
-			if (r.getReviewId() == reviewId) {
-				r.setRatingScore(ratingScore);
-				r.setTextComment(textComment);
-				edited = true;
-
-				// edit inside the product's list of reviews
-				Products product = Products.searchById(r.getProductId());
-				if (product != null) {
-					LinkedList<Reviews> productReviews = product.getReviewsList();
-					productReviews.findFirst();
-					while (true) {
-						Reviews pr = productReviews.retrieve();
-						if (pr.getReviewId() == reviewId) { // Find the same review inside the product’s list
-							pr.setRatingScore(ratingScore);
-							pr.setTextComment(textComment);
-						}
-						if (productReviews.last()) // if we are at the last review, stop looping
-							break;
-						productReviews.findNext();
+		// Insert into AVL tree keyed by reviewId
+				boolean inserted = reviews.insert(review.getReviewId(), review);
+				
+				if (inserted) {
+					// Add the review to the product's own review list
+					Products product = Products.searchById(review.getProductId());
+					if (product != null) {
+						product.addReview(review); 
+						return true;
 					}
 				}
-				break;
+				return false;
 			}
 
-			// Stop when we reach the end of the reviews list
-			if (reviews.last())
-				break;
-			reviews.findNext();
-		}
-
-		return edited;
-	}
-
 	//----------------------------------------------------------------------------------//
-	// Calculate and return the average rating of all reviews in the system
-
-	public static int averageRating() {
-
-		int sum = 0;
-		if (reviews.empty())
-			return sum; // no reviews = 0
-
-		// loop through the review list and add all rating scores
-		reviews.findFirst();
-		while (true) {
-			sum += reviews.retrieve().getRatingScore(); 
-			if (reviews.last()) 
-				break; // stop at last element
-			reviews.findNext();
+	// Edit a review avl
+	
+public static boolean editReview(int reviewId, int ratingScore, String textComment) {
+		
+		if (reviews.empty()) {
+			System.out.println("Review not found");
+			return false;
 		}
-
-		// Average = sum of reviews / number of reviews
-		return sum / reviews.getSize();
+		
+		// Search using AVL findkey
+		if (!reviews.findkey(reviewId)) {
+			System.out.println("Review not found");
+			return false;
+		}
+		
+		// Get the review
+		Reviews review = reviews.retrieve();
+		
+		// Update the review data
+		review.setRatingScore(ratingScore);
+		review.setTextComment(textComment);
+		reviews.update(reviewId, review);
+		
+		// Update inside the product's list of reviews
+		Products product = Products.searchById(review.getProductId());
+		if (product != null) {
+			AVL<Reviews> productReviews = product.getReviewsList();
+			if (!productReviews.empty() && productReviews.findkey(reviewId)) {
+				Reviews pr = productReviews.retrieve();
+				pr.setRatingScore(ratingScore);
+				pr.setTextComment(textComment);
+				productReviews.update(reviewId, pr);
+			}
+		}
+		
+		return true;
 	}
+	//----------------------------------------------------------------------------------//
+		// Calculate average rating of all reviews - O(n)
+		
+public static int averageRating() {
+	if (reviews.empty()) {
+		return 0;
+	}
+	
+	RatingSum result = averageRatingRec(reviews.root);
+	return (result.count > 0) ? result.sum / result.count : 0;
+}
+
+private static RatingSum averageRatingRec(AVLNode<Reviews> node) {
+	if (node == null) {
+		return new RatingSum(0, 0);
+	}
+	
+	RatingSum left = averageRatingRec(node.left);
+	RatingSum right = averageRatingRec(node.right);
+	
+	int totalSum = left.sum + right.sum + node.data.getRatingScore();
+	int totalCount = left.count + right.count + 1;
+	
+	return new RatingSum(totalSum, totalCount);
+}
+
+// Helper class for recursive average calculation
+private static class RatingSum {
+	int sum;
+	int count;
+	
+	RatingSum(int sum, int count) {
+		this.sum = sum;
+		this.count = count;
+	}
+}
 
 	//----------------------------------------------------------------------------------//
 	
@@ -139,6 +144,7 @@ public class Reviews {
 	public void setTextComment(String textComment) { 
 		this.textComment = textComment; }
 
-	public static LinkedList<Reviews> getReviews() { 
-		return reviews; }
+	public static AVL<Reviews> getReviews() { 
+		return reviews; 
+	}
 }
