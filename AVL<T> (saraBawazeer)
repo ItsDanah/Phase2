@@ -23,6 +23,15 @@ public class AVL<T> {
 		return current.data;
 	}
 
+	//-------------------- Update data at a node (like ADT Update)
+	public boolean update(int tkey, T val) {
+		if (findkey(tkey)) { // uses existing findkey
+			current.data = val; // update data
+			return true;        // success
+		}
+		return false;           // key not found
+	}
+
 	//-------------------- FINDKEY (iterative, same as BST)
 	public boolean findkey(int tkey) {
 		AVLNode<T> p = root,q = root;
