@@ -1,10 +1,10 @@
 package project212;
 
-public class AVLTree<T> {
+public class AVL<T> {
 	AVLNode<T> root, current; // same as BST: root and current
 
 	//-------------------- Constructor
-	public AVLTree() {
+	public AVL() {
 		root = current = null;
 	}
 
