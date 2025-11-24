@@ -22,8 +22,8 @@ public class AVL<T> {
 	public T retrieve() {
 		return current.data;
 	}
-
-	//-------------------- Update data at a node (like ADT Update)
+	
+	//-------------------- UPDATE data at node (added, lecture method 4)
 	public boolean update(int tkey, T val) {
 		if (findkey(tkey)) { // uses existing findkey
 			current.data = val; // update data
@@ -31,7 +31,7 @@ public class AVL<T> {
 		}
 		return false;           // key not found
 	}
-
+	
 	//-------------------- FINDKEY (iterative, same as BST)
 	public boolean findkey(int tkey) {
 		AVLNode<T> p = root,q = root;
@@ -226,5 +226,46 @@ public class AVL<T> {
 	private AVLNode<T> rotateRL(AVLNode<T> node) {
 		node.right = rotateLL(node.right);
 		return rotateRR(node);
+	}
+
+
+	//-------------------- deleteSubtree (added, lecture method 6)
+	public void deleteSubtree() {
+		if (current == root) {
+			root = null;
+			current = null;
+		} else {
+			AVLNode<T> p = current;
+			current = findParent(p); // find parent and set as current
+			if (current.left == p) {
+				current.left = null;
+			} else {
+				current.right = null;
+			}
+			current = root; // reset current to root
+		}
+	}
+
+	//-------------------- findParent helper (added for deleteSubtree)
+	private AVLNode<T> findParent(AVLNode<T> p) {
+		return findParentRec(p, root);
+	}
+
+	// Recursive version, preorder traversal
+	private AVLNode<T> findParentRec(AVLNode<T> p, AVLNode<T> t) {
+		if (t == null) {
+			return null;
+		} else {
+			if (t.left == p || t.right == p) {
+				return t; // parent found
+			} else {
+				AVLNode<T> q = findParentRec(p, t.left);
+				if (q != null) {
+					return q;
+				} else {
+					return findParentRec(p, t.right);
+				}
+			}
+		}
 	}
 }
