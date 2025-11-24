@@ -1,4 +1,4 @@
-package project212;
+package Phase2;
 
 public class AVL<T> {
 	AVLNode<T> root, current; // same as BST: root and current
@@ -25,21 +25,20 @@ public class AVL<T> {
 
 	//-------------------- FINDKEY (iterative, same as BST)
 	public boolean findkey(int tkey) {
-		AVLNode<T> p = root;
-		AVLNode<T> q = root;
-		if (empty()) {
+		AVLNode<T> p = root,q = root;
+
+		if(empty())
 			return false;
-		}
-		while (p != null) {
+		while(p != null) {
 			q = p;
-			if (p.key == tkey) {
+			if(p.key == tkey) {
 				current = p;
 				return true;
-			} else if (tkey < p.key) {
-				p = p.left;
-			} else {
-				p = p.right;
 			}
+			else if(tkey < p.key)
+				p = p.left;
+			else
+				p = p.right;
 		}
 		current = q; // parent where key would be attached
 		return false;
@@ -48,21 +47,23 @@ public class AVL<T> {
 	//-------------------- INSERT (BST logic + AVL rebalance)
 	public boolean insert(int k, T val) {
 		AVLNode<T> p, q = current;
+
 		if (findkey(k)) {
 			current = q;
 			return false;
 		}
+
 		p = new AVLNode<T>(k, val);
 		if (empty()) {
 			root = current = p;
-			root = rebalanceRec(root); // rebalance AVL
+			root = rebalanceRec(root); // rebalance AVL \\\\
 			return true;
-		} else {
-			if (k < current.key) {
+		} 
+		else {
+			if (k < current.key)
 				current.left = p;
-			} else {
+			else 
 				current.right = p;
-			}
 			current = p;
 			root = rebalanceRec(root); // rebalance AVL
 			return true;
@@ -72,7 +73,7 @@ public class AVL<T> {
 	//-------------------- REMOVE (BST logic + AVL rebalance)
 	public boolean removeKey(int k) {
 		AVLNode<T> p = root;
-		AVLNode<T> q = null; // parent
+		AVLNode<T> q = null; // parent of p
 		boolean found = false;
 		while ((p != null) && (!found)) {
 			int res = k - p.key;
@@ -82,12 +83,12 @@ public class AVL<T> {
 			} else if (res > 0) {
 				q = p;
 				p = p.right;
-			} else {
+			} else // Found the key
 				found = true;
-			}
 		}
 		if (found) {
-			if ((p.left != null) && (p.right != null)) { // two children
+			if ((p.left != null) && (p.right != null)) { // Case 3: two children
+				// Search for the min in the right subtree
 				AVLNode<T> min = p.right;
 				q = p;
 				while (min.left != null) {
@@ -97,9 +98,8 @@ public class AVL<T> {
 				p.key = min.key;
 				p.data = min.data;
 				deleteNode(min, q);
-			} else { // one or no child
+			} else  // one or no child
 				deleteNode(p, q);
-			}
 			root = rebalanceRec(root); // rebalance AVL
 			current = root;
 			return true;
