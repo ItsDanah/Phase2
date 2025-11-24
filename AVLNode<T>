@@ -1,18 +1,17 @@
-package Phase2;
+package project212;
 
-// AVL Node Class: Represents a single node in the AVL tree
+// AVL Node class
 public class AVLNode<T> {
-    public int key;          // Key for ordering in the AVL tree
-    public T data;           // Stored data
-    public Balance bal;      // Balance is enum (+1, 0, -1)
-    public AVLNode<T> left, right;  // Left child, Right child
+    public int key;              // Key stored in this node
+    public T data;               // Data stored in this node
+    public Balance bal;          // Balance factor (+1, 0, -1)
+    public AVLNode<T> left;      // Left child
+    public AVLNode<T> right;     // Right child
 
-    // Constructor
     public AVLNode(int key, T data) {
-        this.key = key;
-        this.data = data;
-        this.bal = Balance.Zero; // Initialize balance as 0
-        this.left = null;
-        this.right = null;
+        this.key = key;          // Set key
+        this.data = data;        // Set data
+        bal = Balance.Zero;      // New node is balanced
+        left = right = null;     // Children start as null
     }
 }
