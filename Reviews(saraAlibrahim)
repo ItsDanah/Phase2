@@ -21,7 +21,7 @@ public class Reviews {
 	}
 
 	//----------------------------------------------------------------------------------//
-	// Add a new review to AVL tree  O(log n) 
+	// Add a new review to both the static list and the review list in class Products
 
 	public static boolean addReview(Reviews review) {
 
@@ -113,6 +113,37 @@ private static class RatingSum {
 		this.count = count;
 	}
 }
+
+//----------------------------------------------------------------------------------//
+
+
+//Display all customers who reviewed a specific product (sorted by customer ID)
+
+public static void displayCustomersWhoReviewedProduct(int productId) {
+	if (reviews.empty()) {
+		System.out.println("No reviews found.");
+		return;
+	}
+	
+	System.out.println("\n--- Customers Who Reviewed Product ID " + productId + " (Sorted by Customer ID) ---");
+	displayCustomersRec(reviews.root, productId);
+}
+
+private static void displayCustomersRec(AVLNode<Reviews> node, int productId) {
+	if (node == null) return;
+	
+	displayCustomersRec(node.left, productId);
+	
+	if (node.data.getProductId() == productId) {
+		Customers customer = Customers.searchById(node.data.getCustomerId());
+		if (customer != null) {
+			System.out.println(customer + " || Rating Given: " + node.data.getRatingScore());
+		}
+	}
+	
+	displayCustomersRec(node.right, productId);
+}
+
 
 	//----------------------------------------------------------------------------------//
 	
