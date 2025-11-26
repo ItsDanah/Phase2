@@ -26,7 +26,7 @@ public class Products {
 	//----------------------------------------------------------------------------------//
 	// Add a new product
 
-	public  void addProducts(Products product) {
+	public static void addProducts(Products product) {
 
 		if (products.findkey(product.getProductId()) == true) {// Check if product already exists
 			System.out.println("Product already exists");
