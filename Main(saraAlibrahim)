@@ -1,6 +1,5 @@
 package Phase2;
 
-
 import java.util.Scanner;
 
 public class Inventory {
@@ -11,7 +10,6 @@ public class Inventory {
 
 		//----------------------------------------------------------------------------------//
 		// Load CSV data using class DataLoader
-
 		DataLoader.loadCustomers("customers.csv");   
 		DataLoader.loadProducts("prodcuts.csv");     
 		DataLoader.loadOrders("orders.csv");
@@ -19,93 +17,68 @@ public class Inventory {
 
 		//----------------------------------------------------------------------------------//
 		// Main menu
-
 		int choice = -1;
 		while (choice != 0) { 
 
 			// Main menu options
-			System.out.println("\n--- E-Commerce Inventory & Order System (Phase 2) ---");
+			System.out.println("\n--- E-Commerce Inventory & Order System ---");
 			System.out.println("1. Register Customer");
 			System.out.println("2. View All Customers");
 			System.out.println("3. Add Product");
 			System.out.println("4. View All Products");
 			System.out.println("5. Place Order");
-			System.out.println("6. View All Orders");
-			System.out.println("7. Add Review");
-			System.out.println("8. View All Reviews");
-			System.out.println("9. Cancel an Order");
-			System.out.println("10. Update Order Status");
-			System.out.println("11. Track Out-of-Stock Products");
-			System.out.println("12. Top 3 Products by Average Rating");
-			System.out.println("13. Orders Between Two Dates (Range Query)");
-			System.out.println("14. Products Within Price Range (Range Query)");
-			System.out.println("15. Customers Who Reviewed a Product (Sorted)");
+			System.out.println("6. Cancel an Order");
+			System.out.println("7. Update Order Status");
+			System.out.println("8. View All Orders");
+			System.out.println("9. Add Review");
+			System.out.println("10. View All Reviews");
+			
+			System.out.println("11. Display a customer's Order History"); // new
+			System.out.println("12. All orders between two dates");
+			System.out.println("13. Display All Products Within A Price Range");// new
+			System.out.println("14. Top 3 products by average rating");
+			System.out.println("15. View All Customers Sorted Alphabetically"); // new	
+			System.out.println("16. Display all Customers Who Reviewed a Product"); // new
+
 			System.out.println("0. Exit");
 			System.out.print("Enter your choice: ");
+
 			choice = input.nextInt();
 			input.nextLine(); // cleaning garbage
 
 			switch (choice) {
 
-			//----------------------------------------------------------------------------------//
+				//----------------------------------------------------------------------------------
 			case 1: // Register a new customer
 				addACustomer(input);
 				break;
-				//----------------------------------------------------------------------------------//
+				//----------------------------------------------------------------------------------
 			case 2: // View all registered customers
-
 				System.out.println("\n--- All Customers ---");
 				printAVL(Customers.customers);
 				break;
-
-				//----------------------------------------------------------------------------------//
+				//----------------------------------------------------------------------------------
 			case 3: // Add a new product to inventory
 				addAProduct(input);
 				break;
-
-				//----------------------------------------------------------------------------------//
+				//----------------------------------------------------------------------------------
 			case 4: // View all products in inventory
 				System.out.println("\n--- All Products ---");
 				printAVL(Products.getProducts());
 				break;
-
-
-				//----------------------------------------------------------------------------------//
+				//----------------------------------------------------------------------------------
 			case 5: // Place a new order
-
 				placeOrder(input);
 				break;
-
-				//----------------------------------------------------------------------------------//
-			case 6: // View all orders
-
-				System.out.println("\n--- All Orders ---");
-				printAVL(Orders.getOrders());
-				break;
-
-
-				//----------------------------------------------------------------------------------//
-			case 7: // Add a review for a product
-
-				addReview(input);
-				break;
-
-				//----------------------------------------------------------------------------------//
-			case 8: // View all reviews
-
-				System.out.println("\n--- All Reviews ---");
-				printAVL(Reviews.getReviews());
-				break;
-
-				//----------------------------------------------------------------------------------//
-			case 9: // Cancel an order by order ID
+				//----------------------------------------------------------------------------------
+			case 6: // cancel an order
 				System.out.print("Enter Order ID to cancel: ");
 				int cancelId = input.nextInt();
 				input.nextLine();
 				Orders.cancelOrder(cancelId);
 				break;
-				//----------------------------------------------------------------------------------//
-			case 10: // Update status of an existing order
+				//----------------------------------------------------------------------------------
+			case 7: // update order status
 				System.out.print("Enter Order ID: ");
 				int upId = input.nextInt();
 				input.nextLine();
@@ -113,22 +86,36 @@ public class Inventory {
 				String newStatus = input.nextLine();
 				Orders.updateStatus(upId, newStatus);
 				break;
-
-
-				//----------------------------------------------------------------------------------//
-			case 11: // Track out-of-stock products
-				System.out.println("\n--- Out-of-Stock Products ---");
-				AVL<Products> outOfStock = Products.trackOutOfStock();
-				printAVL(outOfStock);
+				//----------------------------------------------------------------------------------
+			case 8: // View all Orders
+				System.out.println("\n--- All Orders ---");
+				printAVL(Orders.getOrders());
 				break;
-
-				//----------------------------------------------------------------------------------//
-			case 12: // Top 3 products by average rating
-				System.out.println("\n--- Top 3 Products by Average Rating ---");
-				Products.printTop3();
+				//----------------------------------------------------------------------------------
+			case 9: // Add a review for a product
+				addReview(input);
 				break;
-				//----------------------------------------------------------------------------------//
-			case 13: // Orders between two dates (Range Query)
+				//----------------------------------------------------------------------------------
+			case 10: // View all reviews
+				System.out.println("\n--- All Reviews ---");
+				printAVL(Reviews.getReviews());
+				break;
+				//----------------------------------------------------------------------------------
+			case 11: // Display a customer's order history
+				System.out.print("Enter Customer ID: ");
+				int cId = input.nextInt();
+				input.nextLine();
+				Customers c = Customers.searchById(cId);
+				if (c == null) {
+					System.out.println("Customer not found!");
+				} 
+				else {
+					System.out.println("\n--- Order History for Customer ID: " + cId + " ---");
+					c.viewOrderHistory(); 
+				}
+				break;
+				//----------------------------------------------------------------------------------
+			case 12: // Display all orders between two dates
 				System.out.print("Enter start date (YYYY-MM-DD): ");
 				String start = input.nextLine();
 				System.out.print("Enter end date (YYYY-MM-DD): ");
@@ -137,9 +124,8 @@ public class Inventory {
 				AVL<Orders> dateRangeOrders = Orders.getOrdersBetweenDates(start, end);
 				printAVL(dateRangeOrders);
 				break;
-
-				//----------------------------------------------------------------------------------//
-			case 14: // Products within price range (Range Query)
+				//----------------------------------------------------------------------------------
+			case 13: // Display all products within a price range
 				System.out.print("Enter minimum price: ");
 				double minPrice = input.nextDouble();
 				System.out.print("Enter maximum price: ");
@@ -149,17 +135,24 @@ public class Inventory {
 				AVL<Products> priceRangeProducts = Products.rangeQueryByPrice(minPrice, maxPrice);
 				printAVL(priceRangeProducts);
 				break;
-
-
-				//----------------------------------------------------------------------------------//
-			case 15: //Customers who reviewed a product (sorted by customer ID)
+				//----------------------------------------------------------------------------------
+			case 14: // Top 3 products by avrage rating
+				System.out.println("\n--- Top 3 Products by Average Rating ---");
+				Products.printTop3();
+				break;
+				//----------------------------------------------------------------------------------
+			case 15: 
+				System.out.println("\n--- Customers Sorted Alphabetically ---");
+				Customers.printCustomersAlphabetically();
+				break;
+				//----------------------------------------------------------------------------------
+			case 16: //Customers who reviewed a product (sorted by customer ID)
 				System.out.print("Enter Product ID: ");
 				int prodIdForReviewers = input.nextInt();
 				input.nextLine();
 				Reviews.displayCustomersWhoReviewedProduct(prodIdForReviewers);
 				break;
-
-				//----------------------------------------------------------------------------------//
+				//----------------------------------------------------------------------------------
 			case 0: // Exit program
 				System.out.println("Exiting system...");
 				break;
@@ -169,118 +162,107 @@ public class Inventory {
 				break;
 			}
 		}
-
 		input.close(); // Close scanner
 	}
 
 	//----------------------------------------------------------------------------------//
 	// Helper method to print any AVL tree
-
-		public static <T> void printAVL(AVL<T> tree) {
-			if (tree == null || tree.empty()) {
-				System.out.println("No data found.");
-				return;
-			}
-			tree.traverseInOrder();
-			
+	public static <T> void printAVL(AVL<T> tree) {
+		if (tree == null || tree.empty()) {
+			System.out.println("No data found.");
+			return;
 		}
-		//----------------------------------------------------------------------------------//
-		// Helper method to add a product
-		
-		public static void addAProduct(Scanner input) {
-			System.out.print("Enter Product ID: ");
-			int pid = input.nextInt();
-			input.nextLine();
-			System.out.print("Enter Product Name: ");
-			String pname = input.nextLine();
-			System.out.print("Enter Price: ");
-			double price = input.nextDouble();
-			System.out.print("Enter Stock Quantity: ");
-			int stock = input.nextInt();
-			input.nextLine();
-			
-			Products product = new Products(pid, pname, price, stock);
-			Products.addProducts(product);
-			System.out.println("Product added successfully.");
-		}
-		//----------------------------------------------------------------------------------//
+		tree.traverseInOrder();
+	}
+	//----------------------------------------------------------------------------------//
+	// Helper method to add a product
+	public static void addAProduct(Scanner input) {
+		System.out.print("Enter Product ID: ");
+		int pid = input.nextInt();
+		input.nextLine();
+		System.out.print("Enter Product Name: ");
+		String pname = input.nextLine();
+		System.out.print("Enter Price: ");
+		double price = input.nextDouble();
+		System.out.print("Enter Stock Quantity: ");
+		int stock = input.nextInt();
+		input.nextLine();
 
-		// Helper method to add a customer
-		
-		public static void addACustomer(Scanner input) {
-			System.out.print("Enter Customer ID: ");
-			int cid = input.nextInt();
-			input.nextLine(); // cleaning garbage
-			System.out.print("Enter Name: ");
-			String cname = input.nextLine();
-			System.out.print("Enter Email: ");
-			String cemail = input.nextLine();
-			Customers.registerCustomer(new Customers(cid, cname, cemail));
-			System.out.println("Customer registered successfully.");
-		}
-
+		Products product = new Products(pid, pname, price, stock);
+		Products.addProducts(product);
+		System.out.println("Product added successfully.");
+	}
+	//----------------------------------------------------------------------------------//
+	// Helper method to add a customer
+	public static void addACustomer(Scanner input) {
+		System.out.print("Enter Customer ID: ");
+		int cid = input.nextInt();
+		input.nextLine(); // cleaning garbage
+		System.out.print("Enter Name: ");
+		String cname = input.nextLine();
+		System.out.print("Enter Email: ");
+		String cemail = input.nextLine();
+		Customers.registerCustomer(new Customers(cid, cname, cemail));
+		System.out.println("Customer registered successfully.");
+	}
 
 	//----------------------------------------------------------------------------------//
 	// Helper method for placing an order
+	public static void placeOrder(Scanner input) {
+		System.out.print("Enter Order ID: ");
+		int oid = input.nextInt();
+		System.out.print("Enter Customer ID: ");
+		int oCid = input.nextInt();
+		input.nextLine();
 
-		public static void placeOrder(Scanner input) {
-			System.out.print("Enter Order ID: ");
-			int oid = input.nextInt();
-			System.out.print("Enter Customer ID: ");
-			int oCid = input.nextInt();
-			input.nextLine();
-
-			Customers cust = Customers.searchById(oCid); // find customer by ID
-			if (cust == null) {
-				System.out.println("Customer not found!");
-				return;
-			}
-
-			Orders order = new Orders(oid, oCid, 0, "2025-11-24", "Pending");
-			order.setCustomer(cust); // link order to customer
-
-			System.out.print("Enter Product IDs (comma separated): ");
-			String prodInput = input.nextLine();
-			String[] prodIds = prodInput.split(",");
-
-			double total = 0; // total price of order
-			for (String pidStr : prodIds) { // iterate through product IDs
-				int pID = Integer.parseInt(pidStr.trim());
-				Products prod = Products.searchById(pID); // find product
-				if (prod != null) {
-					order.getProductsList().insert(pID, prod); // add product to order
-					total += prod.getPrice(); // add price to total
-				} else 
-					System.out.println("Product ID " + pID + " not found");
-			}
-
-			order.setTotalPrice(total); // set total order price
-			order.createOrder(order); // save order to the static list and customer's orders
-			System.out.println("Order placed successfully!");
+		Customers cust = Customers.searchById(oCid); // find customer by ID
+		if (cust == null) {
+			System.out.println("Customer not found!");
+			return;
 		}
+		Orders order = new Orders(oid, oCid, 0, "2025-11-24", "Pending");
+		order.setCustomer(cust); // link order to customer
+		System.out.print("Enter Product IDs (comma separated): ");
+		String prodInput = input.nextLine();
+		String[] prodIds = prodInput.split(",");
+
+		double total = 0; // total price of order
+		for (String pidStr : prodIds) { // iterate through product IDs
+			int pID = Integer.parseInt(pidStr.trim());
+			Products prod = Products.searchById(pID); // find product
+			if (prod != null) {
+				order.getProductsList().insert(pID, prod); // add product to order
+				total += prod.getPrice(); // add price to total
+			} else 
+				System.out.println("Product ID " + pID + " not found");
+		}
+
+		order.setTotalPrice(total); // set total order price
+		order.createOrder(order); // save order to the static list and customer's orders
+		System.out.println("Order placed successfully!");
+	}
 
 	//----------------------------------------------------------------------------------//
 	// Helper method to add a review
-	
-		public static void addReview(Scanner input) {
-			System.out.print("Enter Customer ID: ");
-			int revCid = input.nextInt();
-			input.nextLine();
-			Customers customerRev = Customers.searchById(revCid); // find the customer
-			if (customerRev == null) {
-				System.out.println("Customer not found!");
-				return;
-			}
-			System.out.print("Enter Product ID: ");
-			int revPid = input.nextInt();
-			input.nextLine();
-			System.out.print("Enter Rating (1-5): ");
-			int rating = input.nextInt();
-			input.nextLine();
-			System.out.print("Enter Comment: ");
-			String comment = input.nextLine();
-			customerRev.addReview(revPid, rating, comment);
+	public static void addReview(Scanner input) {
+		System.out.print("Enter Customer ID: ");
+		int revCid = input.nextInt();
+		input.nextLine();
+		Customers customerRev = Customers.searchById(revCid); // find the customer
+		if (customerRev == null) {
+			System.out.println("Customer not found!");
+			return;
 		}
+		System.out.print("Enter Product ID: ");
+		int revPid = input.nextInt();
+		input.nextLine();
+		System.out.print("Enter Rating (1-5): ");
+		int rating = input.nextInt();
+		input.nextLine();
+		System.out.print("Enter Comment: ");
+		String comment = input.nextLine();
+		customerRev.addReview(revPid, rating, comment);
+	}
 
 	//----------------------------------------------------------------------------------//
-
+}
