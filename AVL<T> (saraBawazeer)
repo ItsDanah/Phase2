@@ -32,6 +32,14 @@ public class AVL<T> {
 		return false;  // key not found
 	}
 	
+	//-------------------- height (null=-1, leaf=0)
+		private int height(AVLNode<T> node) {
+			if (node == null) {
+				return -1;
+			}
+			return 1 + Math.max(height(node.left), height(node.right));
+		}
+
 	//-------------------- findKey (iterative)
 	public boolean findkey(int tkey) {
 		AVLNode<T> p = root,q = root;
@@ -190,13 +198,6 @@ public class AVL<T> {
 		}
 	}
 
-	//-------------------- height (null=-1, leaf=0)
-	private int height(AVLNode<T> node) {
-		if (node == null) {
-			return -1;
-		}
-		return 1 + Math.max(height(node.left), height(node.right));
-	}
 
 	//-------------------- Rotations
 	private AVLNode<T> rotateLL(AVLNode<T> node) {
