@@ -1,7 +1,7 @@
 package Phase2;
 
 public class AVL<T> {
-	AVLNode<T> root, current; // same as BST: root and current
+	AVLNode<T> root, current; 
 
 	//-------------------- Constructor
 	public AVL() {
@@ -18,21 +18,21 @@ public class AVL<T> {
 		return false;
 	}
 
-	//-------------------- Retrieve data at current node (same as BST)
+	//-------------------- Retrieve data at current node 
 	public T retrieve() {
 		return current.data;
 	}
 	
-	//-------------------- UPDATE data at node (added, lecture method 4)
+	//-------------------- update data at node 
 	public boolean update(int tkey, T val) {
 		if (findkey(tkey)) { // uses existing findkey
 			current.data = val; // update data
-			return true;        // success
+			return true; // success
 		}
-		return false;           // key not found
+		return false;  // key not found
 	}
 	
-	//-------------------- FINDKEY (iterative, same as BST)
+	//-------------------- findKey (iterative)
 	public boolean findkey(int tkey) {
 		AVLNode<T> p = root,q = root;
 
@@ -53,7 +53,7 @@ public class AVL<T> {
 		return false;
 	}
 
-	//-------------------- INSERT (BST logic + AVL rebalance)
+	//-------------------- insert (with rebalance)
 	public boolean insert(int k, T val) {
 		AVLNode<T> p, q = current;
 
@@ -65,7 +65,7 @@ public class AVL<T> {
 		p = new AVLNode<T>(k, val);
 		if (empty()) {
 			root = current = p;
-			root = rebalanceRec(root); // rebalance AVL \\\\
+			root = rebalanceRec(root); // rebalance AVL 
 			return true;
 		} 
 		else {
@@ -79,7 +79,7 @@ public class AVL<T> {
 		}
 	}
 
-	//-------------------- REMOVE (BST logic + AVL rebalance)
+	//-------------------- remove (with rebalance)
 	public boolean removeKey(int k) {
 		AVLNode<T> p = root;
 		AVLNode<T> q = null; // parent of p
@@ -116,7 +116,7 @@ public class AVL<T> {
 		return false;
 	}
 
-	//-------------------- deleteNode helper (BST)
+	//-------------------- deleteNode 
 	private void deleteNode(AVLNode<T> n, AVLNode<T> parent) {
 		AVLNode<T> child;
 		if (n.left != null) {
@@ -135,11 +135,10 @@ public class AVL<T> {
 		}
 	}
 
-	//-------------------- Traverse in-order (prints key/data)
+	//-------------------- Traverse (in-order)
 	public void traverseInOrder() {
 		traverseInOrderRec(root);
 	}
-
 	private void traverseInOrderRec(AVLNode<T> node) {
 		if (node != null) {
 			traverseInOrderRec(node.left);
@@ -148,7 +147,7 @@ public class AVL<T> {
 		}
 	}
 
-	//-------------------- rebalanceRec (post-order AVL balancing)
+	//-------------------- rebalanceRec (post-order with balancing)
 	private AVLNode<T> rebalanceRec(AVLNode<T> node) {
 		if (node == null) {
 			return null;
@@ -229,7 +228,7 @@ public class AVL<T> {
 	}
 
 
-	//-------------------- deleteSubtree (added, lecture method 6)
+	//-------------------- deleteSubtree 
 	public void deleteSubtree() {
 		if (current == root) {
 			root = null;
@@ -246,12 +245,11 @@ public class AVL<T> {
 		}
 	}
 
-	//-------------------- findParent helper (added for deleteSubtree)
+	// findParent (for deleteSubtree) Recursive
 	private AVLNode<T> findParent(AVLNode<T> p) {
 		return findParentRec(p, root);
 	}
-
-	// Recursive version, preorder traversal
+	 
 	private AVLNode<T> findParentRec(AVLNode<T> p, AVLNode<T> t) {
 		if (t == null) {
 			return null;
@@ -269,3 +267,4 @@ public class AVL<T> {
 		}
 	}
 }
+
