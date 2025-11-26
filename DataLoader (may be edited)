@@ -7,17 +7,17 @@ public class DataLoader {
 
 	//----------------------------------------------------------------------------------//
 	// Load all customers from a CSV file
-	
 	public static void loadCustomers(String fileName) {
 		try {
-			Scanner sc = new Scanner(new File(fileName)); // open file
-			sc.nextLine(); // skip CSV header row
-			while (sc.hasNextLine()) { 
+			Scanner sc = new Scanner(new File(fileName));
+			sc.nextLine(); // skip header
+			while (sc.hasNextLine()) {
 				String[] data = sc.nextLine().split(","); // split CSV line by comma
-				int id = Integer.parseInt(data[0]); // convert ID to integer
-				String name = data[1]; 
+				int id = Integer.parseInt(data[0]);// convert ID to integer
+				String name = data[1];
 				String email = data[2];
-				Customers.registerCustomer(new Customers(id, name, email));
+
+				Customers.registerCustomer(new Customers(id, name, email)); 
 			}
 			sc.close();
 		} catch (Exception e) {
@@ -27,18 +27,18 @@ public class DataLoader {
 
 	//----------------------------------------------------------------------------------//
 	// Load all products from a CSV file
-	
 	public static void loadProducts(String fileName) {
 		try {
-			Scanner sc = new Scanner(new File(fileName)); // open file
+			Scanner sc = new Scanner(new File(fileName));
 			sc.nextLine(); // skip header
+
 			while (sc.hasNextLine()) {
-				String[] data = sc.nextLine().split(",");  // split CSV line by comma
-				int id = Integer.parseInt(data[0]); // convert ID to integer
-				String name = data[1]; 
-				double price = Double.parseDouble(data[2]); // convert price to double
-				int stock = Integer.parseInt(data[3]); // convert stock to integer
-				Products.addProducts(new Products(id, name, price, stock));
+				String[] data = sc.nextLine().split(",");// split CSV line by comma
+				int id = Integer.parseInt(data[0]);// convert ID to integer
+				String name = data[1];
+				double price = Double.parseDouble(data[2]);// convert price to double
+				int stock = Integer.parseInt(data[3]);// convert stock to integer
+				Products.addProducts(new Products(id, name, price, stock)); 
 			}
 			sc.close();
 		} catch (Exception e) {
@@ -48,38 +48,38 @@ public class DataLoader {
 
 	//----------------------------------------------------------------------------------//
 	// Load all orders from a CSV file
-	
 	public static void loadOrders(String fileName) {
 		try {
-			Scanner sc = new Scanner(new File(fileName)); // open file
+			Scanner sc = new Scanner(new File(fileName));// open file
 			sc.nextLine(); // skip header
 			while (sc.hasNextLine()) {
-				String[] data = sc.nextLine().split(","); // split CSV line by comma
-				int oid = Integer.parseInt(data[0]); // convert ID to integer
-				int cid = Integer.parseInt(data[1]);
+				String[] data = sc.nextLine().split(",");// split CSV line by comma
+				int oid = Integer.parseInt(data[0]);   // order ID, convert ID to integer
+				int cid = Integer.parseInt(data[1]);   // customer ID, convert ID to integer
 				String productsStr = data[2].replace("\"", ""); // remove quotes around product IDs
 				double total = Double.parseDouble(data[3]); // convert total price to double
-				String date = data[4]; 
+				String date = data[4];
 				String status = data[5];
 				Orders o = new Orders(oid, cid, total, date, status);
 
 				// link order to customer
-				Customers cust = Customers.searchById(cid);
+				Customers cust = Customers.searchById(cid); 
 				if (cust != null) {
-					o.setCustomer(cust);
+					o.setCustomer(cust); // customer link 
 
-					// add products to order
+					// Add products to order's AVL 
 					String[] prodIds = productsStr.split(";");
-					for (String pidStr : prodIds) {
-						int pid = Integer.parseInt(pidStr.trim());
+					for (int i = 0; i < prodIds.length; i++) {
+						int pid = Integer.parseInt(prodIds[i].trim());
 						Products prod = Products.searchById(pid); 
+
 						if (prod != null) {
-							o.getProductsList().insert(prod);
+							o.getProductsList().insert(prod.getProductId(), prod); // product AVL insert ******************
 						} else {
 							System.out.println("Product ID " + pid + " not found while loading orders");
 						}
 					}
-					o.createOrder(o);
+					o.createOrder(o); 
 				}
 			}
 			sc.close();
@@ -89,22 +89,22 @@ public class DataLoader {
 	}
 
 	//----------------------------------------------------------------------------------//
-	// Load all reviews from a CSV file
-	
+	// Load all reviews
+
 	public static void loadReviews(String fileName) {
 		try {
-			Scanner sc = new Scanner(new File(fileName)); // open file
+			Scanner sc = new Scanner(new File(fileName));// open file
 			sc.nextLine(); // skip header
 			while (sc.hasNextLine()) {
 				String[] data = sc.nextLine().split(","); // split CSV line by comma
 				int rid = Integer.parseInt(data[0]); // convert ID to integer
-				int pid = Integer.parseInt(data[1]); 
+				int pid = Integer.parseInt(data[1]);
 				int cid = Integer.parseInt(data[2]);
 				int rating = Integer.parseInt(data[3]); // convert rating to integer
-				String comment = data[4]; 
+				String comment = data[4];
 
-				Reviews r = new Reviews(rid, pid, cid, rating, comment);
-				Reviews.addReview(r);
+				Reviews r = new Reviews(rid, pid, cid, rating, comment);  
+				Reviews.addReview(r);                                     
 			}
 			sc.close();
 		} catch (Exception e) {
