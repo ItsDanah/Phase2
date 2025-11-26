@@ -1,5 +1,6 @@
 package Phase2;
 
+
 import java.util.Scanner;
 
 public class Inventory {
@@ -23,7 +24,7 @@ public class Inventory {
 		while (choice != 0) { 
 
 			// Main menu options
-			System.out.println("\n--- E-Commerce Inventory & Order System ---");
+			System.out.println("\n--- E-Commerce Inventory & Order System (Phase 2) ---");
 			System.out.println("1. Register Customer");
 			System.out.println("2. View All Customers");
 			System.out.println("3. Add Product");
@@ -32,19 +33,15 @@ public class Inventory {
 			System.out.println("6. View All Orders");
 			System.out.println("7. Add Review");
 			System.out.println("8. View All Reviews");
-			System.out.println("9. Extract all reviews from a specific customer");
-			System.out.println("10. Top 3 products by average rating");
-			System.out.println("11. All orders between two dates");
-			System.out.println("12. Common highly-rated products between two customers");
-			System.out.println("13. Cancel an Order");
-			System.out.println("14. Update Order Status");
-			System.out.println("15. Track Out-of-Stock Products");
-			System.out.println("16. Search Products by Name");
-			System.out.println("17. Products Within Price Range");
-			System.out.println("18. Customers Who Reviewed a Product");
+			System.out.println("9. Cancel an Order");
+			System.out.println("10. Update Order Status");
+			System.out.println("11. Track Out-of-Stock Products");
+			System.out.println("12. Top 3 Products by Average Rating");
+			System.out.println("13. Orders Between Two Dates (Range Query)");
+			System.out.println("14. Products Within Price Range (Range Query)");
+			System.out.println("15. Customers Who Reviewed a Product (Sorted)");
 			System.out.println("0. Exit");
 			System.out.print("Enter your choice: ");
-
 			choice = input.nextInt();
 			input.nextLine(); // cleaning garbage
 
@@ -286,4 +283,4 @@ public class Inventory {
 		}
 
 	//----------------------------------------------------------------------------------//
-}
+
