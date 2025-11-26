@@ -163,15 +163,11 @@ public class Inventory {
 				break;
 
 				//----------------------------------------------------------------------------------//
-			
-			
 			case 0: // Exit program
-
 				System.out.println("Exiting system...");
 				break;
 
 			default: // Invalid choice
-
 				System.out.println("Invalid choice, try again.");
 				break;
 			}
@@ -207,7 +203,7 @@ public class Inventory {
 			input.nextLine();
 			
 			Products product = new Products(pid, pname, price, stock);
-			product.addProducts(product);
+			Products.addProducts(product);
 			System.out.println("Product added successfully.");
 		}
 		//----------------------------------------------------------------------------------//
