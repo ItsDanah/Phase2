@@ -30,6 +30,7 @@ public class Customers {
 			return;
 		}
 		customers.insert(customer.getCustomerId(), customer);
+		System.out.println("Customer registered successfully.");
 	}
 
 	//----------------------------------------------------------------------------------//
