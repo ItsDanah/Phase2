@@ -107,93 +107,80 @@ public class Products {
 	// get average rating
 
 	public int averageRating() {
-
 		if (reviews.empty())
 			return 0;
-		return averageRatingRec(reviews.root).avg();
+		// to hold [sum, count]
+		int[] result = averageRatingRec(reviews.root);
+		if (result[1] == 0) return 0;
+		return result[0] / result[1];
 	}
 
-	private RatingInfo averageRatingRec(AVLNode<Reviews> node) {
-
+	private int[] averageRatingRec(AVLNode<Reviews> node) {
 		if (node == null)
-			return new RatingInfo(0, 0);
+			return new int[]{0, 0};
 
-		RatingInfo left = averageRatingRec(node.left);
-		RatingInfo right = averageRatingRec(node.right);
+		int[] left = averageRatingRec(node.left);
+		int[] right = averageRatingRec(node.right);
 
-		RatingInfo total = new RatingInfo();
-		total.sum = left.sum + right.sum + node.data.getRatingScore();
-		total.count = left.count + right.count + 1;
+		int totalSum = left[0] + right[0] + node.data.getRatingScore();
+		int totalCount = left[1] + right[1] + 1;
 
-		return total;
-	}
-
-	// Helper holder class (not a data structure — fully allowed)
-	private class RatingInfo {
-		int sum;
-		int count;
-
-		RatingInfo() { this.sum = 0; this.count = 0; }
-		RatingInfo(int s, int c) { this.sum = s; this.count = c; }
-
-		int avg() {
-			if (count == 0) return 0;
-			return sum / count;
-		}
+		return new int[]{totalSum, totalCount};
 	}
 
 	//-------------------------------------------------------------- 
 	// Top 3 products by average rating
 
-	public static void printTop3() {
-		if (products.empty()) {
-			System.out.println("No products found.");
-			return;
+		public static void printTop3() {
+			if (products.empty()) {
+				System.out.println("No products found.");
+				return;
+			}
+
+			// Array to hold the top 3 products. Index 0: 1st, 1: 2nd, 2: 3rd.
+			Products[] topProducts = new Products[3];
+			traverseTop(products.root, topProducts);
+
+			System.out.println("Top 3 products by average rating:");
+			print(topProducts);
 		}
 
-		TopThree tracker = new TopThree();
-		traverseTop(products.root, tracker);
+		private static void traverseTop(AVLNode<Products> node, Products[] topProducts) {
+			if (node == null) return;
 
-		System.out.println("Top 3 products by average rating:");
-		tracker.print();
-	}
+			traverseTop(node.left, topProducts);
+			Insert(node.data, topProducts);
+			traverseTop(node.right, topProducts);
+		}
 
-	private static void traverseTop(AVLNode<Products> node, TopThree tracker) {
-		if (node == null) return;
-
-		traverseTop(node.left, tracker);
-		tracker.tryInsert(node.data);
-		traverseTop(node.right, tracker);
-	}
-
-	private static class TopThree {
-		Products first = null;
-		Products second = null;
-		Products third = null;
-
-		void tryInsert(Products p) {
+		// Helper method to insert product into the top 3 array if its rating is high enough
+		private static void Insert(Products p, Products[] topProducts) {
 			int avg = p.averageRating();
 
-			if (first == null || avg > first.averageRating()) {
-				third = second;
-				second = first;
-				first = p;
+			if (topProducts[0] == null || avg > topProducts[0].averageRating()) {
+				// Shift 2nd to 3rd, 1st to 2nd, insert new as 1st
+				topProducts[2] = topProducts[1];
+				topProducts[1] = topProducts[0];
+				topProducts[0] = p;
 			}
-			else if (second == null || avg > second.averageRating()) {
-				third = second;
-				second = p;
+			else if (topProducts[1] == null || avg > topProducts[1].averageRating()) {
+				// Shift 2nd to 3rd, insert new as 2nd
+				topProducts[2] = topProducts[1];
+				topProducts[1] = p;
 			}
-			else if (third == null || avg > third.averageRating()) {
-				third = p;
+			else if (topProducts[2] == null || avg > topProducts[2].averageRating()) {
+				// Insert new as 3rd
+				topProducts[2] = p;
 			}
 		}
 
-		void print() {
-			if (first != null) System.out.println(first + " || Avg Rating: " + first.averageRating());
-			if (second != null) System.out.println(second + " || Avg Rating: " + second.averageRating());
-			if (third != null) System.out.println(third + " || Avg Rating: " + third.averageRating());
+
+		// Print the contents of the topProducts
+		private static void print(Products[] topProducts) {
+			if (topProducts[0] != null) System.out.println(topProducts[0] + " || Avg Rating: " + topProducts[0].averageRating());
+			if (topProducts[1] != null) System.out.println(topProducts[1] + " || Avg Rating: " + topProducts[1].averageRating());
+			if (topProducts[2] != null) System.out.println(topProducts[2] + " || Avg Rating: " + topProducts[2].averageRating());
 		}
-	}
 
 	//-----------------------------------------------------------------
 	// Range Query by price
