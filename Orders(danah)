@@ -29,7 +29,7 @@ public class Orders {
 	//----------------------------------------------------------------------------------//
 	// Create a new order in the system 
 	
-	public void createOrder(Orders order) {
+	public void createOrder(Orders order) {// Time complexity: O(log n) - Space complexity: O(1)
 
 		// Check if an order with the same ID exists in the system
 		if (searchById(order.getOrderId()) != null) {
@@ -37,12 +37,14 @@ public class Orders {
 			return;
 		}
 
-		// Add the new order to the static orders list
+		// Add the new order to the static orders AVL
 		orders.insert(order.getOrderId(),order);
+		
 
-		// Add the order to the customer's own order list
+		// Add the order to the customer's own order AVL
 		if (order.getCustomer() != null) {
-			order.getCustomer().placeOrder(order);  // To link the customer to his order list
+			order.getCustomer().placeOrder(order);  // To link the customer to his order AVL
+			System.out.println("Order placed successfully!");
 		} else {
 			System.out.println("Order has no associated customer");
 		}
@@ -52,7 +54,7 @@ public class Orders {
 	//----------------------------------------------------------------------------------//
 	// Cancel an existing order (only if still pending)
 
-	public static void cancelOrder(int orderId) {
+	public static void cancelOrder(int orderId) {// Time complexity: O(log n) - Space complexity: O(1)
 		// Find order by ID
 		Orders canceledOrder = searchById(orderId);
 
@@ -75,7 +77,7 @@ public class Orders {
 	//----------------------------------------------------------------------------------//
 	// Update the status of an order
 
-	public static void updateStatus(int orderId, String status) {
+	public static void updateStatus(int orderId, String status) {// Time complexity: O(log n) - Space complexity: O(1)
 		// Find the order by id
 		Orders updatedOrder = searchById(orderId);
 
@@ -92,7 +94,7 @@ public class Orders {
 	//----------------------------------------------------------------------------------//
 	// Search for an order by id
 
-	public static Orders searchById(int orderId) {
+	public static Orders searchById(int orderId) {// Time complexity: O(log n) - Space complexity: O(1)
 		
 		if (orders.empty()) // if no orders exist
 			return null; 
@@ -106,7 +108,7 @@ public class Orders {
 	//----------------------------------------------------------------------------------//
 	// Get all orders made between two dates in the format YYYY-MM-DD
 
-    public static AVL<Orders> getOrdersBetweenDates(String date1, String date2) {
+    public static AVL<Orders> getOrdersBetweenDates(String date1, String date2) {// Time complexity: O(n log n) - Space complexity: O(n)
         AVL<Orders> result = new AVL<>();
 
         if (orders.empty()) return result;
