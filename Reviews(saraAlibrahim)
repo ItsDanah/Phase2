@@ -2,16 +2,17 @@ package Phase2;
 
 public class Reviews {
 
-	// Static list holding all reviews made in the system
+	// Static AVL tree holding all reviews
 	private static AVL<Reviews> reviews = new AVL<>();
-	// Attributes
-	private int reviewId;      // review ID for each review
-	private int productId;     // ID of the reviewed product
-	private int customerId;    // ID of the customer who wrote the review
-	private int ratingScore;   //  rating from 1 to 5
-	private String textComment; // comment on the review
 
-	// Constructor:
+	// Review attributes
+	private int reviewId;
+	private int productId;
+	private int customerId;
+	private int ratingScore;
+	private String textComment;
+
+	// Constructor
 	public Reviews(int reviewId, int productId, int customerId, int ratingScore, String textComment) {
 		this.reviewId = reviewId;
 		this.productId = productId;
@@ -21,161 +22,135 @@ public class Reviews {
 	}
 
 	//----------------------------------------------------------------------------------//
-	// Add a new review to both the static list and the review list in class Products
+	// Add a new review to the main review list and the product's own review list
 
 	public static boolean addReview(Reviews review) {
-
-		// Insert into AVL tree keyed by reviewId
-				boolean inserted = reviews.insert(review.getReviewId(), review);
-				
-				if (inserted) {
-					// Add the review to the product's own review list
-					Products product = Products.searchById(review.getProductId());
-					if (product != null) {
-						product.addReview(review); 
-						return true;
-					}
-				}
-				return false;
+		// Insert review into main AVL keyed by reviewId
+		boolean inserted = reviews.insert(review.getReviewId(), review);
+		if (inserted) {
+			// Add the review to the product’s own review tree
+			Products product = Products.searchById(review.getProductId());
+			if (product != null) {
+				product.addReview(review);
+				return true;
 			}
+		}
+		return false;
+	}
 
 	//----------------------------------------------------------------------------------//
-	// Edit a review avl
-	
-public static boolean editReview(int reviewId, int ratingScore, String textComment) {
-		
+	// Edit a review inside both the main list and the product’s own list
+
+	public static boolean editReview(int reviewId, int ratingScore, String textComment) {
 		if (reviews.empty()) {
 			System.out.println("Review not found");
 			return false;
 		}
-		
-		// Search using AVL findkey
-		if (!reviews.findkey(reviewId)) {
+		boolean exists = reviews.findkey(reviewId);
+		if (!exists) {
 			System.out.println("Review not found");
 			return false;
 		}
-		
-		// Get the review
+		// Retrieve the review
 		Reviews review = reviews.retrieve();
-		
-		// Update the review data
+		// Update review values
 		review.setRatingScore(ratingScore);
 		review.setTextComment(textComment);
+		// Update inside main AVL
 		reviews.update(reviewId, review);
-		
-		// Update inside the product's list of reviews
+		// Now update the review also inside the product's own list
 		Products product = Products.searchById(review.getProductId());
 		if (product != null) {
 			AVL<Reviews> productReviews = product.getReviewsList();
-			if (!productReviews.empty() && productReviews.findkey(reviewId)) {
-				Reviews pr = productReviews.retrieve();
-				pr.setRatingScore(ratingScore);
-				pr.setTextComment(textComment);
-				productReviews.update(reviewId, pr);
+			if (!productReviews.empty()) {
+				boolean inside = productReviews.findkey(reviewId);
+				if (inside) {
+					Reviews pr = productReviews.retrieve();
+					pr.setRatingScore(ratingScore);
+					pr.setTextComment(textComment);
+					productReviews.update(reviewId, pr);
+				}
 			}
 		}
-		
 		return true;
 	}
+
 	//----------------------------------------------------------------------------------//
-		// Calculate average rating of all reviews - O(n)
-		
-public static int averageRating() {
-	if (reviews.empty()) {
+	// Calculate average rating for all reviews
+	public static int averageRating() {
+		if (reviews.empty()) {
+			return 0;
+		}
+		int[] result = averageRatingRec(reviews.root);// result[0] = sum, result[1] = count
+		if (result[1] > 0) {
+			return result[0] / result[1]; 
+		}
 		return 0;
 	}
-	
-	RatingSum result = averageRatingRec(reviews.root);
-	return (result.count > 0) ? result.sum / result.count : 0;
-}
-
-private static RatingSum averageRatingRec(AVLNode<Reviews> node) {
-	if (node == null) {
-		return new RatingSum(0, 0);
-	}
-	
-	RatingSum left = averageRatingRec(node.left);
-	RatingSum right = averageRatingRec(node.right);
-	
-	int totalSum = left.sum + right.sum + node.data.getRatingScore();
-	int totalCount = left.count + right.count + 1;
-	
-	return new RatingSum(totalSum, totalCount);
-}
-
-// Helper class for recursive average calculation
-private static class RatingSum {
-	int sum;
-	int count;
-	
-	RatingSum(int sum, int count) {
-		this.sum = sum;
-		this.count = count;
-	}
-}
-
-//----------------------------------------------------------------------------------//
-
-
-//Display all customers who reviewed a specific product (sorted by customer ID)
-
-public static void displayCustomersWhoReviewedProduct(int productId) {
-	if (reviews.empty()) {
-		System.out.println("No reviews found.");
-		return;
-	}
-	
-	System.out.println("\n--- Customers Who Reviewed Product ID " + productId + " (Sorted by Customer ID) ---");
-	displayCustomersRec(reviews.root, productId);
-}
-
-private static void displayCustomersRec(AVLNode<Reviews> node, int productId) {
-	if (node == null) return;
-	
-	displayCustomersRec(node.left, productId);
-	
-	if (node.data.getProductId() == productId) {
-		Customers customer = Customers.searchById(node.data.getCustomerId());
-		if (customer != null) {
-			System.out.println(customer + " || Rating Given: " + node.data.getRatingScore());
+	// helper method returns {sum, count}
+	private static int[] averageRatingRec(AVLNode<Reviews> node) {
+		if (node == null) {
+			return new int[]{0, 0};
 		}
+		int[] left = averageRatingRec(node.left);
+		int[] right = averageRatingRec(node.right);
+
+		int sum = left[0] + right[0] + node.data.getRatingScore();
+		int count = left[1] + right[1] + 1;
+
+		return new int[]{sum, count};
 	}
-	
-	displayCustomersRec(node.right, productId);
-}
 
 
 	//----------------------------------------------------------------------------------//
-	
+	// Display customers who reviewed a specific product 
+	public static void displayCustomersWhoReviewedProduct(int productId) {
+		if (reviews.empty()) {
+			System.out.println("No reviews found.");
+			return;
+		}
+		System.out.println("\n--- Customers Who Reviewed Product ID " + productId + " (Sorted by Customer ID) ---");
+		displayCustomersRec(reviews.root, productId);
+	}
+	// helper method to print sorted by customer ID
+	private static void displayCustomersRec(AVLNode<Reviews> node, int productId) {
+		if (node == null) {
+			return;
+		}
+		displayCustomersRec(node.left, productId);
+		if (node.data.getProductId() == productId) {
+			Customers customer = Customers.searchById(node.data.getCustomerId());
+			if (customer != null) {
+				System.out.println(customer + " || Rating Given: " + node.data.getRatingScore());
+			}
+		}
+		displayCustomersRec(node.right, productId);
+	}
+
+	//----------------------------------------------------------------------------------//
 	public String toString() {
-		return "Review ID: " + reviewId +" || Product ID: " + productId +" || Customer ID: " + customerId +" || Rating: " + ratingScore +" || Comment: " + textComment;
+		return "Review ID: " + reviewId 
+				+ " || Product ID: " + productId 
+				+ " || Customer ID: " + customerId 
+				+ " || Rating: " + ratingScore 
+				+ " || Comment: " + textComment;
 	}
-	
-	//----------------------------------------------------------------------------------//
+
 	// Setters and getters
-	
 	public int getReviewId() { 
 		return reviewId; }
-	
 	public int getProductId() { 
 		return productId; }
-	
 	public int getCustomerId() { 
 		return customerId; }
-	
-	public int getRatingScore() { 
+	public int getRatingScore() {
 		return ratingScore; }
-	
 	public String getTextComment() { 
 		return textComment; }
-	
 	public void setRatingScore(int ratingScore) { 
 		this.ratingScore = ratingScore; }
-	
-	public void setTextComment(String textComment) { 
+	public void setTextComment(String textComment) {
 		this.textComment = textComment; }
-
 	public static AVL<Reviews> getReviews() { 
-		return reviews; 
-	}
+		return reviews; }
 }
