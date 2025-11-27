@@ -34,9 +34,9 @@ public class Inventory {
 			System.out.println("10. View All Reviews");
 
 			System.out.println("11. Display a customer's Order History"); // new
-			System.out.println("12. All orders between two dates");
+			System.out.println("12. All orders between two dates");// from phase 1
 			System.out.println("13. Display All Products Within A Price Range");// new
-			System.out.println("14. Top 3 products by average rating");
+			System.out.println("14. Top 3 products by average rating");// from phase 1
 			System.out.println("15. View All Customers Sorted Alphabetically"); // new	
 			System.out.println("16. Display all Customers Who Reviewed a Product"); // new
 
@@ -227,14 +227,15 @@ public class Inventory {
 		String[] prodIds = prodInput.split(",");
 
 		double total = 0; // total price of order
-		for (String pidStr : prodIds) { // iterate through product IDs
-			int pID = Integer.parseInt(pidStr.trim());
-			Products prod = Products.searchById(pID); // find product
-			if (prod != null) {
-				order.getProductsList().insert(pID, prod); // add product to order
-				total += prod.getPrice(); // add price to total
-			} else 
-				System.out.println("Product ID " + pID + " not found");
+		for (int i = 0; i < prodIds.length; i++) { // iterate through product IDs
+		    String pidStr = prodIds[i].trim();
+		    int pID = Integer.parseInt(pidStr);
+		    Products prod = Products.searchById(pID); // find product
+		    if (prod != null) {
+		        order.getProductsList().insert(pID, prod); // add product to order
+		        total += prod.getPrice(); // add price to total
+		    } else
+		        System.out.println("Product ID " + pID + " not found");
 		}
 
 		order.setTotalPrice(total); // set total order price
