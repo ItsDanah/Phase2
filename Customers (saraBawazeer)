@@ -24,7 +24,7 @@ public class Customers {
 	//----------------------------------------------------------------------------------//
 	// Register a new customer 
 
-	public static void registerCustomer(Customers customer) {
+	public static void registerCustomer(Customers customer) {// Time complexity: O(log n) - Space complexity: O(1)
 		if (searchById(customer.getCustomerId()) != null) {
 			System.out.println("Customer already exists in the system");
 			return;
@@ -35,15 +35,15 @@ public class Customers {
 	//----------------------------------------------------------------------------------//
 	// Place an order for the customer
 
-	public void placeOrder(Orders order) {
-		// Add the order to this customer's individual orders list
+	public void placeOrder(Orders order) {// Time complexity: O(log n) -  Space complexity: O(n)
+		// Add the order to this customer's individual orders AVL
 		ordersList.insert(order.getOrderId(), order);
 	}
 
 	//----------------------------------------------------------------------------------//
 	// View the order history of the customer
 
-	public void viewOrderHistory() {
+	public void viewOrderHistory() {// Time complexity: O(n)- Space complexity: O(log n)
 		if (ordersList.empty()) {
 			System.out.println("No orders found.");
 			return;
@@ -54,7 +54,7 @@ public class Customers {
 	//----------------------------------------------------------------------------------//
 	// Add a review for a product
 
-	public void addReview(int productId, int ratingScore, String textComment) {
+	public void addReview(int productId, int ratingScore, String textComment) {//time complexity is O(log n) -  space complexity is O(1)
 
 		if (ordersList.empty()) {
 			System.out.println("No orders found");
@@ -69,17 +69,15 @@ public class Customers {
 			}
 			newKey = node.key + 1;
 		}
-		// Create review with generated ID
-		Reviews review = new Reviews(newKey, productId, customerId, ratingScore, textComment);
-		// Add review to Reviews AVL
-		Reviews.addReview(review);
+		Reviews review = new Reviews(newKey, productId, customerId, ratingScore, textComment);// Create review with generated ID
+		Reviews.addReview(review);// Add review to Reviews AVL
 		System.out.println("Review added successfully.");
 	}
 
 	//----------------------------------------------------------------------------------//
 	// Search for a customer by Id
 
-	public static Customers searchById(int customerId) {
+	public static Customers searchById(int customerId) {//  Time complexity: O(log n) - Space complexity: O(1)
 		if (customers.empty())
 			return null;
 		if (customers.findkey(customerId))
@@ -90,29 +88,29 @@ public class Customers {
 	//----------------------------------------------------------------------------------//
 	// List all Customers Sorted Alphabetically
 	
-	public static void printCustomersAlphabetically() {
+	public static void printCustomersAlphabetically() {// time comp o(n log n) - space comp O(log n)
 		if (customers.empty()) { // if AVL tree is empty
 			System.out.println("No customers found.");
 			return;
 		}
 		printNextAlphabetically(null); // start printing with no last printed (null because we haven’t printed any names yet)
 	}
-	// Recursively print one customer at a time in alphabetical order
+	// repeatedly print one customer at a time in alphabetical order
 	private static void printNextAlphabetically(String lastPrintedName) {
 		AVLNode<Customers> next = findNextAlphabetical(customers.root, lastPrintedName, null); // to find the next customer alphabetically after lastPrintedName
-		if (next == null)//if no more customers are left
+		if (next == null)//if no more costomers 
 			return; 
 		System.out.println(next.data); // Print the current customer
 		printNextAlphabetically(next.data.getName()); // print the next customer after this one
 	}
-	// helper method Find the customer with the smallest name that is greater than lastPrintedName (node:current node in AVL tree we’re checking)
+	// helper method Find the customer with the smallest name that is greater than lastPrintedName (node is the current node in AVL tree we r checking)
 	private static AVLNode<Customers> findNextAlphabetical(AVLNode<Customers> node, String lastPrintedName, AVLNode<Customers> smallest) {
-		if (node == null)// reached end of subtree, return current smallest
+		if (node == null)// reached end of subtree so return current smallest
 			return smallest; 
 		smallest = findNextAlphabetical(node.left, lastPrintedName, smallest); // check left subtree for smaller smallest
 		if (lastPrintedName == null || node.data.getName().compareTo(lastPrintedName) > 0) { // if node name > last printed
 			if (smallest == null || node.data.getName().compareTo(smallest.data.getName()) < 0) { // if smaller than current smallest
-				smallest = node; // update candidate
+				smallest = node; // update smallest
 			}
 		}
 		smallest = findNextAlphabetical(node.right, lastPrintedName, smallest); // check right subtree
