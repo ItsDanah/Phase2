@@ -144,7 +144,7 @@ public class AVL<T> {
 	}
 
 	//-------------------- Traverse (in-order)
-	public void traverseInOrder() {
+	public void traverseInOrder() {  // time complexity O(n)- space complexity O(log n)
 		traverseInOrderRec(root);
 	}
 	private void traverseInOrderRec(AVLNode<T> node) {
