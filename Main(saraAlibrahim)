@@ -167,7 +167,7 @@ public class Inventory {
 
 	//----------------------------------------------------------------------------------//
 	// Helper method to print any AVL tree
-	public static <T> void printAVL(AVL<T> tree) {
+	public static <T> void printAVL(AVL<T> tree) {// time complexity O(n)- space complexity O(log n)
 		if (tree == null || tree.empty()) {
 			System.out.println("No data found.");
 			return;
@@ -176,7 +176,7 @@ public class Inventory {
 	}
 	//----------------------------------------------------------------------------------//
 	// Helper method to add a product
-	public static void addAProduct(Scanner input) {
+	public static void addAProduct(Scanner input) {// Time complexity: O(log n) - Space complexity: O(1)
 		System.out.print("Enter Product ID: ");
 		int pid = input.nextInt();
 		input.nextLine();
@@ -190,11 +190,10 @@ public class Inventory {
 
 		Products product = new Products(pid, pname, price, stock);
 		Products.addProducts(product);
-		System.out.println("Product added successfully.");
 	}
 	//----------------------------------------------------------------------------------//
 	// Helper method to add a customer
-	public static void addACustomer(Scanner input) {
+	public static void addACustomer(Scanner input) {// Time complexity: O(log n) - Space complexity: O(1)
 		System.out.print("Enter Customer ID: ");
 		int cid = input.nextInt();
 		input.nextLine(); // cleaning garbage
@@ -203,12 +202,11 @@ public class Inventory {
 		System.out.print("Enter Email: ");
 		String cemail = input.nextLine();
 		Customers.registerCustomer(new Customers(cid, cname, cemail));
-		System.out.println("Customer registered successfully.");
 	}
 
 	//----------------------------------------------------------------------------------//
 	// Helper method for placing an order
-	public static void placeOrder(Scanner input) {
+	public static void placeOrder(Scanner input) {// Time complexity: O(log n) - Space complexity: O(1)
 		System.out.print("Enter Order ID: ");
 		int oid = input.nextInt();
 		System.out.print("Enter Customer ID: ");
@@ -240,7 +238,6 @@ public class Inventory {
 
 		order.setTotalPrice(total); // set total order price
 		order.createOrder(order); // save order to the static list and customer's orders
-		System.out.println("Order placed successfully!");
 	}
 
 	//----------------------------------------------------------------------------------//
