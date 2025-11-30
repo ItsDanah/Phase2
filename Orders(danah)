@@ -8,7 +8,7 @@ public class Orders {
 	// Each order contains its own AVL of products
 	private AVL<Products> productsList;
 
-	// attributes
+	//~~~~~~~~~~~ Attributes ~~~~~~~~~~~
 	private int orderId;		 // ID of the order
 	private int customerId;      // ID of the customer who made the order
 	private Customers customer;  // reference to the customer object
@@ -16,7 +16,7 @@ public class Orders {
 	private String orderDate;    // format: YYYY-MM-DD
 	private String status;       // status of the order: Canceled, Pending, etc...
 
-	// Constructor:
+	//~~~~~~~~~~~ Constructor ~~~~~~~~~~~
 	public Orders(int orderId, int customerId, double totalPrice, String orderDate, String status) {
 		this.orderId = orderId;             
 		this.customerId = customerId;       
@@ -26,21 +26,15 @@ public class Orders {
 		this.productsList = new AVL<>();
 	}
 
-	//----------------------------------------------------------------------------------//
-	// Create a new order in the system 
+	//~~~~~~~~~~~ Create a new order in the system ~~~~~~~~~~~
 	
-	public void createOrder(Orders order) {// Time complexity: O(log n) - Space complexity: O(1)
-
-		// Check if an order with the same ID exists in the system
-		if (searchById(order.getOrderId()) != null) {
+	public void createOrder(Orders order) {
+		if (searchById(order.getOrderId()) != null) { // Check if an order with the same ID exists in the system
 			System.out.println("Order already exists");
 			return;
 		}
-
-		// Add the new order to the static orders AVL
-		orders.insert(order.getOrderId(),order);
+		orders.insert(order.getOrderId(),order); // Add the new order to the static orders AVL tree
 		
-
 		// Add the order to the customer's own order AVL
 		if (order.getCustomer() != null) {
 			order.getCustomer().placeOrder(order);  // To link the customer to his order AVL
@@ -48,103 +42,80 @@ public class Orders {
 		} else {
 			System.out.println("Order has no associated customer");
 		}
-
 	}
 
-	//----------------------------------------------------------------------------------//
-	// Cancel an existing order (only if still pending)
+	//~~~~~~~~~~~ Cancel an existing order (only if still pending) ~~~~~~~~~~~
 
-	public static void cancelOrder(int orderId) {// Time complexity: O(log n) - Space complexity: O(1)
-		// Find order by ID
+	public static void cancelOrder(int orderId) {
 		Orders canceledOrder = searchById(orderId);
-
 		if (canceledOrder == null) {
 			System.out.println("No order found with this ID");
 			return;
 		}
-
 		// Only pending orders can be canceled
 		if (!canceledOrder.getStatus().equalsIgnoreCase("Pending")) {
 			System.out.println("You can't cancel an order after it has been shipped");
 			return;
 		}
-
 		// Set order status to "Canceled"
 		canceledOrder.setStatus("Canceled");
 		System.out.println("Order canceled successfully");
 	}
 
-	//----------------------------------------------------------------------------------//
-	// Update the status of an order
+	//~~~~~~~~~~~ Update the status of the order ~~~~~~~~~~~
 
-	public static void updateStatus(int orderId, String status) {// Time complexity: O(log n) - Space complexity: O(1)
-		// Find the order by id
+	public static void updateStatus(int orderId, String status) {
 		Orders updatedOrder = searchById(orderId);
-
 		if (updatedOrder == null) {
 			System.out.println("No order found with this ID");
 			return;
 		}
-
-		// Set order status
 		updatedOrder.setStatus(status);
 		System.out.println("Order status updated successfully");
 	}
 
-	//----------------------------------------------------------------------------------//
-	// Search for an order by id
+	//~~~~~~~~~~~ Search for an order by ID ~~~~~~~~~~~
 
-	public static Orders searchById(int orderId) {// Time complexity: O(log n) - Space complexity: O(1)
-		
-		if (orders.empty()) // if no orders exist
+	public static Orders searchById(int orderId) {
+		if (orders.empty())
 			return null; 
-
 		if (orders.findkey(orderId))
 			return orders.retrieve();
-
 		return null;
 	}
 
-	//----------------------------------------------------------------------------------//
-	// Get all orders made between two dates in the format YYYY-MM-DD
+	//~~~~~~~~~~~ Get all orders made between two dates in the format YYYY-MM-DD ~~~~~~~~~~~
 
-    public static AVL<Orders> getOrdersBetweenDates(String date1, String date2) {// Time complexity: O(n log n) - Space complexity: O(n)
+    public static AVL<Orders> getOrdersBetweenDates(String date1, String date2) {
         AVL<Orders> result = new AVL<>();
-
-        if (orders.empty()) return result;
-
+        if (orders.empty()) 
+        	return result;
         int d1 = Integer.parseInt(date1.replace("-", ""));
         int d2 = Integer.parseInt(date2.replace("-", ""));
 
         traverseDateRange(orders.root, d1, d2, result);
-
         return result;
     }
 
     private static void traverseDateRange(AVLNode<Orders> node, int d1, int d2, AVL<Orders> orders) {
         if (node == null) 
         	return;
-
         traverseDateRange(node.left, d1, d2, orders);
-
         int orderDateInt = Integer.parseInt(node.data.getOrderDate().replace("-", ""));
         if (orderDateInt >= d1 && orderDateInt <= d2) {
             orders.insert(node.data.getOrderId(), node.data);
         }
-
         traverseDateRange(node.right, d1, d2, orders);
     }
 
-	//----------------------------------------------------------------------------------//
+	//~~~~~~~~~~~ ToString ~~~~~~~~~~~
 
     public String toString() {
-
         return "Order ID: " + orderId +" || Customer ID: " + customerId + " || Total Price: " + totalPrice + " || Order Date: " + orderDate + " || Status: " + status;
     }
 
-
-	//----------------------------------------------------------------------------------//
-	// Getters and setters
+	//~~~~~~~~~~~ Setters and Getters ~~~~~~~~~~~
+    
 	public int getOrderId() { 
 		return orderId;}
 
