@@ -132,18 +132,25 @@ public class Reviews {
 	
 	public int getReviewId() { 
 		return reviewId; }
+	
 	public int getProductId() { 
 		return productId; }
+	
 	public int getCustomerId() { 
 		return customerId; }
+	
 	public int getRatingScore() {
 		return ratingScore; }
+	
 	public String getTextComment() { 
 		return textComment; }
+	
 	public void setRatingScore(int ratingScore) { 
 		this.ratingScore = ratingScore; }
+	
 	public void setTextComment(String textComment) {
 		this.textComment = textComment; }
+	
 	public static AVL<Reviews> getReviews() { 
 		return reviews; }
 }
