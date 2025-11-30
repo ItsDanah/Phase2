@@ -105,8 +105,8 @@ public class Customers {
 		if (node == null) // reached end of subtree so return current smallest
 			return smallest; 
 		smallest = findNextAlphabetical(node.left, lastPrintedName, smallest); // check left subtree for a possible smaller smallest value
-		if (lastPrintedName == null || node.data.getName().compareTo(lastPrintedName) > 0) { // if node name > last printed
-			if (smallest == null || node.data.getName().compareTo(smallest.data.getName()) < 0) { // if node is smaller than current smallest
+		if (lastPrintedName == null || node.data.getName().compareToIgnoreCase(lastPrintedName) > 0) { // if node name > last printed
+			if (smallest == null || node.data.getName().compareToIgnoreCase(smallest.data.getName()) < 0) { // if node is smaller than current smallest
 				smallest = node; // update smallest
 			}
 		}
