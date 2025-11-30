@@ -1,4 +1,4 @@
-package project212;
+package Phase2;
 
 // AVL Node class
 public class AVLNode<T> {
@@ -9,9 +9,9 @@ public class AVLNode<T> {
     public AVLNode<T> right;     // Right child
 
     public AVLNode(int key, T data) {
-        this.key = key;          // Set key
-        this.data = data;        // Set data
-        bal = Balance.Zero;      // New node is balanced
-        left = right = null;     // Children start as null
+        this.key = key;
+        this.data = data;
+        bal = Balance.Zero;
+        left = right = null;
     }
 }
