@@ -3,46 +3,46 @@ package Phase2;
 public class AVL<T> {
 	AVLNode<T> root, current; 
 
-	//-------------------- Constructor
+	//~~~~~~~~~~~ Constructor ~~~~~~~~~~~
 	public AVL() {
 		root = current = null;
 	}
 
-	//-------------------- Check if tree is empty
+	//~~~~~~~~~~~ Is tree empty? ~~~~~~~~~~~
 	public boolean empty() {
 		return root == null;
 	}
 
-	//-------------------- Tree never full
+	//~~~~~~~~~~~ Tree is never full ~~~~~~~~~~~
 	public boolean full() {
 		return false;
 	}
 
-	//-------------------- Retrieve data at current node 
+	//~~~~~~~~~~~ Retrieve data at the current node  ~~~~~~~~~~~
 	public T retrieve() {
 		return current.data;
 	}
-	
-	//-------------------- update data at node 
-	public boolean update(int tkey, T val) {
-		if (findkey(tkey)) { // uses existing findkey
-			current.data = val; // update data
-			return true; // success
-		}
-		return false;  // key not found
-	}
-	
-	//-------------------- height (null=-1, leaf=0)
-		private int height(AVLNode<T> node) {
-			if (node == null) {
-				return -1;
-			}
-			return 1 + Math.max(height(node.left), height(node.right));
-		}
 
-	//-------------------- findKey (iterative)
+	//~~~~~~~~~~~ Update data of the node at the given key ~~~~~~~~~~~
+	public boolean update(int tkey, T val) {
+		if (findkey(tkey)) { // If the given key exists
+			current.data = val;
+			return true; // Success, data is updated
+		}
+		return false;  // Fail, key not found
+	}
+
+	//~~~~~~~~~~~ Height (null=-1, leaf=0) ~~~~~~~~~~~
+	private int height(AVLNode<T> node) {
+		if (node == null) {
+			return -1;
+		}
+		return 1 + Math.max(height(node.left), height(node.right));
+	}
+
+	//~~~~~~~~~~~ Set the current at the given key ~~~~~~~~~~~
 	public boolean findkey(int tkey) {
-		AVLNode<T> p = root,q = root;
+		AVLNode<T> p = root,q = root; // q is parent of p
 
 		if(empty())
 			return false;
@@ -57,41 +57,42 @@ public class AVL<T> {
 			else
 				p = p.right;
 		}
-		current = q; // parent where key would be attached
+		current = q; // Parent where key should be attached when inserted
 		return false;
 	}
 
-	//-------------------- insert (with rebalance)
+	//~~~~~~~~~~~ Insert and rebalance  ~~~~~~~~~~~
 	public boolean insert(int k, T val) {
-		AVLNode<T> p, q = current;
+		AVLNode<T> p, q = current; 
 
-		if (findkey(k)) {
-			current = q;
-			return false;
+		if (findkey(k)) { // findkey() modified current
+			current = q; 
+			return false; // Key already exists
 		}
 
 		p = new AVLNode<T>(k, val);
 		if (empty()) {
 			root = current = p;
-			root = rebalanceRec(root); // rebalance AVL 
+			root = rebalanceRec(root); // Rebalance AVL 
 			return true;
 		} 
-		else {
+		else {  // current is pointing to parent of the new key
 			if (k < current.key)
 				current.left = p;
 			else 
 				current.right = p;
 			current = p;
-			root = rebalanceRec(root); // rebalance AVL
+			root = rebalanceRec(root); // Rebalance AVL
 			return true;
 		}
 	}
 
-	//-------------------- remove (with rebalance)
+	//~~~~~~~~~~~ Remove and rebalance  ~~~~~~~~~~~
 	public boolean removeKey(int k) {
 		AVLNode<T> p = root;
-		AVLNode<T> q = null; // parent of p
+		AVLNode<T> q = null; // q is parent of p
 		boolean found = false;
+		// Search for k
 		while ((p != null) && (!found)) {
 			int res = k - p.key;
 			if (res < 0) {
@@ -112,11 +113,11 @@ public class AVL<T> {
 					q = min;
 					min = min.left;
 				}
-				p.key = min.key;
+				p.key = min.key; // p is the root of the right subtree
 				p.data = min.data;
-				deleteNode(min, q);
-			} else  // one or no child
-				deleteNode(p, q);
+				deleteNode(min, q); // q is the parent of min in this case
+			} else  // Case 1&2: one or no child
+				deleteNode(p, q); 
 			root = rebalanceRec(root); // rebalance AVL
 			current = root;
 			return true;
@@ -124,7 +125,7 @@ public class AVL<T> {
 		return false;
 	}
 
-	//-------------------- deleteNode 
+	//~~~~~~~~~~~ Delete the node  ~~~~~~~~~~~
 	private void deleteNode(AVLNode<T> n, AVLNode<T> parent) {
 		AVLNode<T> child;
 		if (n.left != null) {
@@ -132,7 +133,7 @@ public class AVL<T> {
 		} else {
 			child = n.right;
 		}
-		if (parent == null) {
+		if (parent == null) { // If the deleted node is the root (the parent of the root is null)
 			root = child;
 		} else {
 			if (n.key - parent.key < 0) {
@@ -143,11 +144,11 @@ public class AVL<T> {
 		}
 	}
 
-	//-------------------- Traverse (in-order)
-	public void traverseInOrder() {  // time complexity O(n)- space complexity O(log n)
+	//~~~~~~~~~~~ Traverse (in order)  ~~~~~~~~~~~
+	public void traverseInOrder() {
 		traverseInOrderRec(root);
 	}
-	private void traverseInOrderRec(AVLNode<T> node) {
+	private void traverseInOrderRec(AVLNode<T> node) { // left child > parent > right child
 		if (node != null) {
 			traverseInOrderRec(node.left);
 			System.out.println("Key: " + node.key + ", Data: " + node.data);
@@ -155,7 +156,7 @@ public class AVL<T> {
 		}
 	}
 
-	//-------------------- rebalanceRec (post-order with balancing)
+	//~~~~~~~~~~~ Rebalance  ~~~~~~~~~~~
 	private AVLNode<T> rebalanceRec(AVLNode<T> node) {
 		if (node == null) {
 			return null;
@@ -165,16 +166,16 @@ public class AVL<T> {
 		return balance(node);
 	}
 
-	//-------------------- balance (AVL rotation logic)
+	//~~~~~~~~~~~ Balance (AVL rotation logic) ~~~~~~~~~~~
 	private AVLNode<T> balance(AVLNode<T> node) {
 		updateBalance(node);
-		if (node.bal.getValue() > 1) { // left-heavy
+		if (node.bal.getValue() > 1) { // Left-heavy
 			if (height(node.left.left) >= height(node.left.right)) {
 				node = rotateLL(node);
 			} else {
 				node = rotateLR(node);
 			}
-		} else if (node.bal.getValue() < -1) { // right-heavy
+		} else if (node.bal.getValue() < -1) { // Right-heavy
 			if (height(node.right.right) >= height(node.right.left)) {
 				node = rotateRR(node);
 			} else {
@@ -184,7 +185,7 @@ public class AVL<T> {
 		return node;
 	}
 
-	//-------------------- updateBalance (null=-1, leaf=0)
+	//~~~~~~~~~~~ Update balance (null=-1, leaf=0)  ~~~~~~~~~~~
 	private void updateBalance(AVLNode<T> node) {
 		int leftHeight = height(node.left);
 		int rightHeight = height(node.right);
@@ -199,7 +200,7 @@ public class AVL<T> {
 	}
 
 
-	//-------------------- Rotations
+	//~~~~~~~~~~~ Rotations  ~~~~~~~~~~~
 	private AVLNode<T> rotateLL(AVLNode<T> node) {
 		AVLNode<T> newRoot = node.left;
 		node.left = newRoot.right;
@@ -228,35 +229,34 @@ public class AVL<T> {
 		return rotateRR(node);
 	}
 
-
-	//-------------------- deleteSubtree 
+	//~~~~~~~~~~~ Delete subtree  ~~~~~~~~~~~
 	public void deleteSubtree() {
 		if (current == root) {
 			root = null;
 			current = null;
 		} else {
 			AVLNode<T> p = current;
-			current = findParent(p); // find parent and set as current
+			current = findParent(p); // Find parent and set as current
 			if (current.left == p) {
 				current.left = null;
 			} else {
 				current.right = null;
 			}
-			current = root; // reset current to root
+			current = root; // Reset current to root
 		}
 	}
 
-	// findParent (for deleteSubtree) Recursive
+	//~~~~~~~~~~~ Find parent  ~~~~~~~~~~~
 	private AVLNode<T> findParent(AVLNode<T> p) {
 		return findParentRec(p, root);
 	}
-	 
+
 	private AVLNode<T> findParentRec(AVLNode<T> p, AVLNode<T> t) {
 		if (t == null) {
 			return null;
 		} else {
 			if (t.left == p || t.right == p) {
-				return t; // parent found
+				return t; // Parent found
 			} else {
 				AVLNode<T> q = findParentRec(p, t.left);
 				if (q != null) {
@@ -268,4 +268,3 @@ public class AVL<T> {
 		}
 	}
 }
-
