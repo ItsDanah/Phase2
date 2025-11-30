@@ -2,21 +2,19 @@ package Phase2;
 
 import java.util.Scanner;
 
-public class Inventory {
+public class Main {
 
 	public static void main(String args[]) {
 
 		Scanner input = new Scanner(System.in);
 
-		//----------------------------------------------------------------------------------//
-		// Load CSV data using class DataLoader
+		//~~~~~~~~~~~ Load CSV data using class DataLoader ~~~~~~~~~~~
 		DataLoader.loadCustomers("customers.csv");   
 		DataLoader.loadProducts("prodcuts.csv");     
 		DataLoader.loadOrders("orders.csv");
 		DataLoader.loadReviews("reviews.csv");
 
-		//----------------------------------------------------------------------------------//
-		// Main menu
+		//~~~~~~~~~~~ Main menu ~~~~~~~~~~~
 		int choice = -1;
 		while (choice != 0) { 
 
@@ -71,14 +69,14 @@ public class Inventory {
 				placeOrder(input);
 				break;
 				//----------------------------------------------------------------------------------
-			case 6: // cancel an order
+			case 6: // Cancel an order
 				System.out.print("Enter Order ID to cancel: ");
 				int cancelId = input.nextInt();
 				input.nextLine();
 				Orders.cancelOrder(cancelId);
 				break;
 				//----------------------------------------------------------------------------------
-			case 7: // update order status
+			case 7: // Update order status
 				System.out.print("Enter Order ID: ");
 				int upId = input.nextInt();
 				input.nextLine();
@@ -136,12 +134,12 @@ public class Inventory {
 				printAVL(priceRangeProducts);
 				break;
 				//----------------------------------------------------------------------------------
-			case 14: // Top 3 products by avrage rating
+			case 14: // Top 3 products by average rating
 				System.out.println("\n--- Top 3 Products by Average Rating ---");
 				Products.printTop3();
 				break;
 				//----------------------------------------------------------------------------------
-			case 15: 
+			case 15:  // Print customers sorted alphabetically
 				System.out.println("\n--- Customers Sorted Alphabetically ---");
 				Customers.printCustomersAlphabetically();
 				break;
@@ -156,7 +154,7 @@ public class Inventory {
 			case 0: // Exit program
 				System.out.println("Exiting system...");
 				break;
-
+				//----------------------------------------------------------------------------------
 			default: // Invalid choice
 				System.out.println("Invalid choice, try again.");
 				break;
@@ -165,18 +163,19 @@ public class Inventory {
 		input.close(); // Close scanner
 	}
 
-	//----------------------------------------------------------------------------------//
-	// Helper method to print any AVL tree
-	public static <T> void printAVL(AVL<T> tree) {// time complexity O(n)- space complexity O(log n)
+	//~~~~~~~~~~~ Method to print any AVL tree ~~~~~~~~~~~
+
+	public static <T> void printAVL(AVL<T> tree) {
 		if (tree == null || tree.empty()) {
 			System.out.println("No data found.");
 			return;
 		}
 		tree.traverseInOrder();
 	}
-	//----------------------------------------------------------------------------------//
-	// Helper method to add a product
-	public static void addAProduct(Scanner input) {// Time complexity: O(log n) - Space complexity: O(1)
+
+	//~~~~~~~~~~~ Add a product ~~~~~~~~~~~
+
+	public static void addAProduct(Scanner input) {
 		System.out.print("Enter Product ID: ");
 		int pid = input.nextInt();
 		input.nextLine();
@@ -191,9 +190,10 @@ public class Inventory {
 		Products product = new Products(pid, pname, price, stock);
 		Products.addProducts(product);
 	}
-	//----------------------------------------------------------------------------------//
-	// Helper method to add a customer
-	public static void addACustomer(Scanner input) {// Time complexity: O(log n) - Space complexity: O(1)
+
+	//~~~~~~~~~~~ Add a customer ~~~~~~~~~~~
+
+	public static void addACustomer(Scanner input) {
 		System.out.print("Enter Customer ID: ");
 		int cid = input.nextInt();
 		input.nextLine(); // cleaning garbage
@@ -204,49 +204,49 @@ public class Inventory {
 		Customers.registerCustomer(new Customers(cid, cname, cemail));
 	}
 
-	//----------------------------------------------------------------------------------//
-	// Helper method for placing an order
-	public static void placeOrder(Scanner input) {// Time complexity: O(log n) - Space complexity: O(1)
+	//~~~~~~~~~~~ Place an order ~~~~~~~~~~~
+
+	public static void placeOrder(Scanner input) {
 		System.out.print("Enter Order ID: ");
 		int oid = input.nextInt();
 		System.out.print("Enter Customer ID: ");
 		int oCid = input.nextInt();
 		input.nextLine();
 
-		Customers cust = Customers.searchById(oCid); // find customer by ID
+		Customers cust = Customers.searchById(oCid); // Find customer by ID
 		if (cust == null) {
 			System.out.println("Customer not found!");
 			return;
 		}
 		Orders order = new Orders(oid, oCid, 0, "2025-11-24", "Pending");
-		order.setCustomer(cust); // link order to customer
+		order.setCustomer(cust); // Link order to customer
 		System.out.print("Enter Product IDs (comma separated): ");
 		String prodInput = input.nextLine();
 		String[] prodIds = prodInput.split(",");
 
-		double total = 0; // total price of order
-		for (int i = 0; i < prodIds.length; i++) { // iterate through product IDs
-		    String pidStr = prodIds[i].trim();
-		    int pID = Integer.parseInt(pidStr);
-		    Products prod = Products.searchById(pID); // find product
-		    if (prod != null) {
-		        order.getProductsList().insert(pID, prod); // add product to order
-		        total += prod.getPrice(); // add price to total
-		    } else
-		        System.out.println("Product ID " + pID + " not found");
+		double total = 0; // Total price of order
+		for (int i = 0; i < prodIds.length; i++) { // Iterate through product IDs
+			String pidStr = prodIds[i].trim();
+			int pID = Integer.parseInt(pidStr);
+			Products prod = Products.searchById(pID); // Find product
+			if (prod != null) {
+				order.getProductsList().insert(pID, prod); // Add product to order
+				total += prod.getPrice(); // Add price to total
+			} else
+				System.out.println("Product ID " + pID + " not found");
 		}
 
-		order.setTotalPrice(total); // set total order price
-		order.createOrder(order); // save order to the static list and customer's orders
+		order.setTotalPrice(total); // Set total order price
+		order.createOrder(order); // Save order to the static list and customer's orders
 	}
 
-	//----------------------------------------------------------------------------------//
-	// Helper method to add a review
+	//~~~~~~~~~~~ Add a review ~~~~~~~~~~~
+
 	public static void addReview(Scanner input) {
 		System.out.print("Enter Customer ID: ");
 		int revCid = input.nextInt();
 		input.nextLine();
-		Customers customerRev = Customers.searchById(revCid); // find the customer
+		Customers customerRev = Customers.searchById(revCid); // Find the customer
 		if (customerRev == null) {
 			System.out.println("Customer not found!");
 			return;
@@ -262,5 +262,4 @@ public class Inventory {
 		customerRev.addReview(revPid, rating, comment);
 	}
 
-	//----------------------------------------------------------------------------------//
 }
