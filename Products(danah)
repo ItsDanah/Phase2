@@ -7,13 +7,14 @@ public class Products {
 
 	// Each product has its own AVL tree of reviews
 	private AVL<Reviews> reviews; 
+
+	//~~~~~~~~~~~ Attributes ~~~~~~~~~~~
 	private int productId; // key of the product
 	private String name; // name of the product
 	private double price; // price of the product
 	private int stock; // the number of this product available
 
-	//----------------------------------------------------------------------------------//
-	// Constructor:
+	//~~~~~~~~~~~ Constructor ~~~~~~~~~~~
 
 	public Products(int productId, String name, double price, int stock) {
 		this.productId = productId;
@@ -23,12 +24,10 @@ public class Products {
 		this.reviews = new AVL<>();
 	}
 
-	//----------------------------------------------------------------------------------//
-	// Add a new product
+	//~~~~~~~~~~~ Add a new product ~~~~~~~~~~~
 
-	public static void addProducts(Products product) {// Time complexity: O(log n) - Space complexity: O(1)
-
-		if (products.findkey(product.getProductId()) == true) {// Check if product already exists
+	public static void addProducts(Products product) {
+		if (products.findkey(product.getProductId()) == true) { // Check if product already exists
 			System.out.println("Product already exists");
 			return;
 		}
@@ -36,10 +35,9 @@ public class Products {
 		System.out.println("Product added successfully.");
 	}
 
-	//----------------------------------------------------------------------------------//
-	// Remove a product by Id
+	//~~~~~~~~~~~ Remove a product by ID ~~~~~~~~~~~
 
-	public void removeProduct(int productId) {// Time complexity: O(log n) - Space complexity: O(1)
+	public void removeProduct(int productId) {
 		if (products.empty()) {
 			System.out.println("No products found");
 			return;
@@ -53,10 +51,9 @@ public class Products {
 		System.out.println("Product not found");
 	}
 
-	//----------------------------------------------------------------------------------//
-	// Update the price and stock for a product
+	//~~~~~~~~~~~ Update the price and stock for a product ~~~~~~~~~~~
 
-	public void updateProducts(int productId, double price, int stock) {// Time complexity: O(log n) - Space complexity: O(1)
+	public void updateProducts(int productId, double price, int stock) {
 		if (!products.findkey(productId)) {
 			System.out.println("No product found with that ID");
 			return;
@@ -67,21 +64,17 @@ public class Products {
 		System.out.println("Product updated successfully");
 	}
 
-	//----------------------------------------------------------------------------------//
-	// Search for a product by its key
+	//~~~~~~~~~~~ Search for a product by its key ~~~~~~~~~~~
 
-	public static Products searchById(int productID) {// Time complexity: O(log n) - Space complexity: O(1)
-
+	public static Products searchById(int productID) {
 		if (!products.findkey(productID))
 			return null;
 		return products.retrieve();
-
 	}
 
-	//----------------------------------------------------------------------------------//
-	// Track out of stock products ( stock=0 )
+	//~~~~~~~~~~~ Track out of stock products ( stock=0 ) ~~~~~~~~~~~
 
-	public static AVL<Products> trackOutOfStock() {// Time complexity: O(n log n) - Space complexity: O(n)
+	public static AVL<Products> trackOutOfStock() {
 		AVL<Products> outOfStock = new AVL<>();
 		traverseOutOfStock(products.root, outOfStock);
 		return outOfStock;
@@ -97,23 +90,21 @@ public class Products {
 		traverseOutOfStock(node.right, outOfStock);
 	}
 
+	//~~~~~~~~~~~ Add review ~~~~~~~~~~~
 
-	// ----------------------------------
-	// add review
-	public void addReview(Reviews review) {// Time complexity: O(log n) - Space complexity: O(1)
+	public void addReview(Reviews review) {
 		reviews.insert(review.getReviewId(), review);
 	}
 
-	//-------------------------------------------------------------- 
-	// get average rating
+	//~~~~~~~~~~~ Get average rating ~~~~~~~~~~~
 
-	public int averageRating() {// Time complexity: O(n) - Space complexity: O(log n)
+	public int averageRating() {
 		if (reviews.empty())
 			return 0;
-		// to hold [sum, count]
-		int[] result = averageRatingRec(reviews.root);
-		if (result[1] == 0) return 0;
-		return result[0] / result[1];
+		int[] result = averageRatingRec(reviews.root);	// To hold [sum, count]
+		if (result[1] == 0) // If no reviews found (result[1] is count)
+			return 0; 
+		return result[0] / result[1]; // sum/count
 	}
 
 	private int[] averageRatingRec(AVLNode<Reviews> node) {
@@ -123,95 +114,91 @@ public class Products {
 		int[] left = averageRatingRec(node.left);
 		int[] right = averageRatingRec(node.right);
 
-		int totalSum = left[0] + right[0] + node.data.getRatingScore();
-		int totalCount = left[1] + right[1] + 1;
+		int totalSum = left[0] + right[0] + node.data.getRatingScore(); // Add current node's rating score to the sum from left and right
+		int totalCount = left[1] + right[1] + 1;  // Increment count by 1 for the current node plus counts from left and right
 
 		return new int[]{totalSum, totalCount};
 	}
 
-	//-------------------------------------------------------------- 
-	// Top 3 products by average rating
+	//~~~~~~~~~~~ Top 3 products by average rating ~~~~~~~~~~~
 
-		public static void printTop3() {// Time complexity: O(n) - Space complexity: O(log n)
-			if (products.empty()) {
-				System.out.println("No products found.");
-				return;
-			}
-
-			// Array to hold the top 3 products. Index 0: 1st, 1: 2nd, 2: 3rd.
-			Products[] topProducts = new Products[3];
-			traverseTop(products.root, topProducts);
-
-			System.out.println("Top 3 products by average rating:");
-			print(topProducts);
+	public static void printTop3() {
+		if (products.empty()) {
+			System.out.println("No products found.");
+			return;
 		}
 
-		private static void traverseTop(AVLNode<Products> node, Products[] topProducts) {
-			if (node == null) return;
+		// To hold the top 3 products
+		Products[] topProducts = new Products[3];
+		traverseTop(products.root, topProducts);
 
-			traverseTop(node.left, topProducts);
-			Insert(node.data, topProducts);
-			traverseTop(node.right, topProducts);
+		System.out.println("Top 3 products by average rating:");
+		print(topProducts);
+	}
+
+	private static void traverseTop(AVLNode<Products> node, Products[] topProducts) {
+		if (node == null)
+			return;
+		// In order traversal
+		traverseTop(node.left, topProducts);
+		Insert(node.data, topProducts);
+		traverseTop(node.right, topProducts);
+	}
+
+	// Method to insert product into topProducts if its rating is high enough
+	private static void Insert(Products p, Products[] topProducts) {
+		int avg = p.averageRating();
+
+		if (topProducts[0] == null || avg > topProducts[0].averageRating()) {
+			// Shift 1st to 2nd, 2nd to 3rd, then insert new as 1st
+			topProducts[2] = topProducts[1];
+			topProducts[1] = topProducts[0];
+			topProducts[0] = p;
 		}
-
-		// Helper method to insert product into the top 3 array if its rating is high enough
-		private static void Insert(Products p, Products[] topProducts) {
-			int avg = p.averageRating();
-
-			if (topProducts[0] == null || avg > topProducts[0].averageRating()) {
-				// Shift 2nd to 3rd, 1st to 2nd, insert new as 1st
-				topProducts[2] = topProducts[1];
-				topProducts[1] = topProducts[0];
-				topProducts[0] = p;
-			}
-			else if (topProducts[1] == null || avg > topProducts[1].averageRating()) {
-				// Shift 2nd to 3rd, insert new as 2nd
-				topProducts[2] = topProducts[1];
-				topProducts[1] = p;
-			}
-			else if (topProducts[2] == null || avg > topProducts[2].averageRating()) {
-				// Insert new as 3rd
-				topProducts[2] = p;
-			}
+		else if (topProducts[1] == null || avg > topProducts[1].averageRating()) {
+			// Shift 2nd to 3rd, then insert new as 2nd
+			topProducts[2] = topProducts[1];
+			topProducts[1] = p;
 		}
-
-
-		// Print the contents of the topProducts
-		private static void print(Products[] topProducts) {
-			if (topProducts[0] != null) System.out.println(topProducts[0] + " || Avg Rating: " + topProducts[0].averageRating());
-			if (topProducts[1] != null) System.out.println(topProducts[1] + " || Avg Rating: " + topProducts[1].averageRating());
-			if (topProducts[2] != null) System.out.println(topProducts[2] + " || Avg Rating: " + topProducts[2].averageRating());
+		else if (topProducts[2] == null || avg > topProducts[2].averageRating()) {
+			// Insert new as 3rd
+			topProducts[2] = p;
 		}
+	}
 
-	//-----------------------------------------------------------------
-	// Range Query by price
+	// Print the contents of the topProducts
+	private static void print(Products[] topProducts) {
+		if (topProducts[0] != null) System.out.println(topProducts[0] + " || Avg Rating: " + topProducts[0].averageRating());
+		if (topProducts[1] != null) System.out.println(topProducts[1] + " || Avg Rating: " + topProducts[1].averageRating());
+		if (topProducts[2] != null) System.out.println(topProducts[2] + " || Avg Rating: " + topProducts[2].averageRating());
+	}
 
-	public static AVL<Products> rangeQueryByPrice(double minPrice, double maxPrice) { // Time complexity: O(log n) - Space complexity: O(log n)
+	//~~~~~~~~~~~ Range query by price ~~~~~~~~~~~
+
+	public static AVL<Products> rangeQueryByPrice(double minPrice, double maxPrice) {
 		AVL<Products> result = new AVL<>();
 		rangeRec(products.root, minPrice, maxPrice, result);
 		return result;
 	}
 
-	private static void rangeRec(AVLNode<Products> node, double min, double max, AVL<Products> out) {
-		if (node == null) return;
-
-		rangeRec(node.left, min, max, out);
-
+	private static void rangeRec(AVLNode<Products> node, double min, double max, AVL<Products> result) {
+		if (node == null) 
+			return;
+		rangeRec(node.left, min, max, result);
 		if (node.data.price >= min && node.data.price <= max)
-			out.insert(node.data.productId, node.data);
+			result.insert(node.data.productId, node.data);
 
-		rangeRec(node.right, min, max, out);
+		rangeRec(node.right, min, max, result);
 	}
 
 
-	//----------------------------------------------------------------------------------//
+	//~~~~~~~~~~~ ToString ~~~~~~~~~~~
 
 	public String toString() {
 		return "Product ID: " + productId + " || Name: " + name + " || Price: " + price + " || Stock: " + stock;
 	}
 
-	//----------------------------------------------------------------------------------//
-	// Setters and getters
+	//~~~~~~~~~~~ Setters and getters ~~~~~~~~~~~
 
 	public int getProductId() { 
 		return productId; }
@@ -235,6 +222,5 @@ public class Products {
 		return reviews; }
 
 	public static AVL<Products> getProducts() { 
-		return products; 
-	}
+		return products; }
 }
