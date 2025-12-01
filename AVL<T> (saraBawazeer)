@@ -167,37 +167,46 @@ public class AVL<T> {
 	}
 
 	//~~~~~~~~~~~ Balance (AVL rotation logic) ~~~~~~~~~~~
+	//   >1  right-heavy, < -1  lrft-heavy
 	private AVLNode<T> balance(AVLNode<T> node) {
-		updateBalance(node);
-		if (node.bal.getValue() > 1) { // Left-heavy
-			if (height(node.left.left) >= height(node.left.right)) {
-				node = rotateLL(node);
-			} else {
-				node = rotateLR(node);
-			}
-		} else if (node.bal.getValue() < -1) { // Right-heavy
-			if (height(node.right.right) >= height(node.right.left)) {
-				node = rotateRR(node);
-			} else {
-				node = rotateRL(node);
-			}
-		}
-		return node;
+	    updateBalance(node);
+	    if (node.bal.getValue() > 1) { 
+	        // right-heavy 
+	        if (height(node.right.right) >= height(node.right.left)) {
+	            node = rotateRR(node);   
+	        } else {
+	            node = rotateRL(node);   
+	        }
+
+	    } else if (node.bal.getValue() < -1) {
+	        //   left-heavy 
+	        if (height(node.left.left) >= height(node.left.right)) {
+	            node = rotateLL(node);  
+	        } else {
+	            node = rotateLR(node);  
+	        }
+	    }
+
+	    return node;
 	}
 
+
 	//~~~~~~~~~~~ Update balance (null=-1, leaf=0)  ~~~~~~~~~~~
+	// CHANGED: balance factor is now (rightHeight - leftHeight)
 	private void updateBalance(AVLNode<T> node) {
-		int leftHeight = height(node.left);
-		int rightHeight = height(node.right);
-		int diff = leftHeight - rightHeight;
-		if (diff == 1) {
-			node.bal = Balance.PlusOne;
-		} else if (diff == 0) {
-			node.bal = Balance.Zero;
-		} else {
-			node.bal = Balance.MinusOne;
-		}
+	    int leftHeight = height(node.left);
+	    int rightHeight = height(node.right);
+	    int diff = rightHeight - leftHeight; 
+
+	    if (diff == 1) {
+	        node.bal = Balance.PlusOne;
+	    } else if (diff == 0) {
+	        node.bal = Balance.Zero;
+	    } else {
+	        node.bal = Balance.MinusOne;
+	    }
 	}
+
 
 
 	//~~~~~~~~~~~ Rotations  ~~~~~~~~~~~
